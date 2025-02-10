@@ -1,0 +1,14 @@
+{
+    "service": {
+        "name": "simple-file-processor",
+        "version": "1.0.0",
+        "port": 8080
+    },
+    "routes": [
+        {
+            "path": "/health",
+            "handler": "HealthCheckHandler",
+            "method": "GET"
+        }
+    ]
+}
