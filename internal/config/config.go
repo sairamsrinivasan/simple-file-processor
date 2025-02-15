@@ -32,7 +32,7 @@ type Config interface {
 func NewConfig() config {
 	c := &config{}
 
-	// load the configuratiion file
+	// load the configuratiion file using runtime
 	conf, err := os.ReadFile("config/configuration.json")
 	if err != nil {
 		fmt.Printf("Error loading configuration file: %v\n", err)

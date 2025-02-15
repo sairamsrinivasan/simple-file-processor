@@ -16,3 +16,8 @@ clean:
 	@echo "Cleaning up..."
 	rm -rf ./bin/$(BINARY_NAME)
 	@echo "Clean complete."
+
+test:
+	@echo "Running tests..."
+	go test ./...
+	@echo "Tests complete."	
