@@ -17,6 +17,7 @@ func NewHandlers() *handler {
 	h := &handler{}
 	h.handlers = make(map[string]func(w http.ResponseWriter, r *http.Request))
 	h.handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
+	h.handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)
 	return h
 }
 

@@ -9,6 +9,11 @@
             "path": "/health",
             "handler": "HealthCheckHandler",
             "method": "GET"
+        },
+        {
+            "path": "/upload",
+            "handler": "FileUploadHandler",
+            "method": "POST"
         }
     ]
 }
