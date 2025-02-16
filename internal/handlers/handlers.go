@@ -30,9 +30,9 @@ func NewHandlers(log zerolog.Logger) *handler {
 
 func (h handler) GetHandler(name string) func(w http.ResponseWriter, r *http.Request) {
 	h.log.Debug().Msg("Getting handler for name: " + name)
-	if handler, ok := h.handlers[name]; ok {
+	if hand, ok := h.handlers[name]; ok {
 		h.log.Debug().Msg("Handler found for name: " + name)
-		return handler
+		return hand
 	}
 
 	return nil
