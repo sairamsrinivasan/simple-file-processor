@@ -35,6 +35,7 @@ type Config interface {
 	GetDatabasePort() int
 	GetDatabaseName() string
 	GetDatabaseType() string
+	GetConnectionString() string
 }
 
 type database struct {
@@ -137,6 +138,7 @@ func (c *config) GetDatabaseName() string {
 	return name
 }
 
+// returns the database type eg. postgres, mysql, etc
 func (c *config) GetDatabaseType() string {
 	t := GetEnv("DB_TYPE")
 	if t == "" {
@@ -144,6 +146,14 @@ func (c *config) GetDatabaseType() string {
 	}
 
 	return t
+}
+
+// returns the connection string for the database
+func (c *config) GetConnectionString() string {
+	// Construct the database connection string here'
+	str := fmt.Sprintf("%s:%s@%s:%d/%s?sslmode=disable", c.GetDatabaseUsername(), c.GetDatabasePassword(), c.GetDatabaseHost(), c.GetDatabasePort(), c.GetDatabaseName())
+
+	return c.GetDatabaseType() + "://" + str
 }
 
 func GetEnv(key string) string {

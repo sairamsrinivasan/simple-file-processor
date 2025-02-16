@@ -110,4 +110,8 @@ func TestConfig(t *testing.T) {
 			os.Unsetenv("DB_TYPE")
 		})
 	})
+
+	t.Run("GetConnectionString", func(t *testing.T) {
+		assert.Equal(t, c.GetConnectionString(), "postgres://username:password@localhost:5432/file_processor?sslmode=disable")
+	})
 }

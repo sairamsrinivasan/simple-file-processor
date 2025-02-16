@@ -1,32 +1,25 @@
 package db
 
 import (
-	"simple-file-processor/internal/config"
-
+	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-type database struct {
-	db *gorm.DB
+type DB struct {
+	log zerolog.Logger
+	db  *gorm.DB
 }
 
 // NewDB creates a new database instance with the given configuration
-func NewDB(conf config.Config) database {
+func NewDB(connStr string, l zerolog.Logger) DB {
 	// Initialize the database with the given configuration
 	// and return the database instance
-	db, err := gorm.Open(postgres.Open(ConnectionString(conf)), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
+		l.Error().Err(err).Msg("Failed to connect to database")
 		panic(err)
 	}
 
-	return database{db: db}
-}
-
-// ConnectionString returns the connection string for the database
-func ConnectionString(conf config.Config) string {
-	// Construct the database connection string here
-	return conf.GetDatabaseType() +
-		"://" + conf.GetDatabaseUsername() + ":" + conf.GetDatabasePassword() +
-		"@" + conf.GetDatabaseHost() + ":" + string(conf.GetDatabasePort()) + "/" + conf.GetDatabaseName() + "?sslmode=disable"
+	return DB{db: db, log: l}
 }

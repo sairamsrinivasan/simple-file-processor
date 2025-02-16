@@ -6,12 +6,14 @@ import (
 	"simple-file-processor/internal/handlers"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog"
 )
 
 type router struct {
 	conf     config.Config
 	handlers handlers.Handlers
 	router   *mux.Router
+	log      zerolog.Logger
 }
 
 type Router interface {
@@ -19,22 +21,21 @@ type Router interface {
 	GetRouter() *mux.Router
 }
 
-func NewRouter(c config.Config) Router {
+func NewRouter(c config.Config, log zerolog.Logger) Router {
 	// Initialize the router with the given configuration
 	// and return the router instance
-	r := &router{
-		conf: c,
+	return &router{
+		conf:     c,
+		log:      log,
+		router:   mux.NewRouter(),
+		handlers: handlers.NewHandlers(log),
 	}
-
-	r.router = mux.NewRouter()
-	r.handlers = handlers.NewHandlers()
-	return r
 }
 
 // Initializes the routes for the server using the configuration
 func (r *router) InitRoutes() {
 	// Initialize routes here
-	fmt.Println("Initializing routes")
+	r.log.Debug().Msg("Initializing routes")
 	rts := r.conf.GetRoutes()
 	for _, rt := range rts {
 		fmt.Println("Route: ", rt.Path, " Method: ", rt.Method)
