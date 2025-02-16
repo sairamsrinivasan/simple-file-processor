@@ -26,4 +26,8 @@ func TestNewConfig(t *testing.T) {
 
 	// check if the routes are loaded correctly
 	assert.NotEmpty(t, c.GetRoutes())
+
+	// check database configuration
+	assert.Equal(t, c.GetDatabase().Type, "postgres")
+	assert.Equal(t, c.GetDatabase().ConnectionString, "localhost:5432")
 }

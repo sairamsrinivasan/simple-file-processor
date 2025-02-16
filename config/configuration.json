@@ -15,5 +15,13 @@
             "handler": "FileUploadHandler",
             "method": "POST"
         }
-    ]
+    ],
+    "database": {
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "username": "user",
+        "password": "password",
+        "database": "file_processor"
+    }
 }
