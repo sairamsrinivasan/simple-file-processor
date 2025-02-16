@@ -28,6 +28,13 @@ type Routes struct {
 type Config interface {
 	GetPort() int
 	GetRoutes() []Routes
+	GetDB() database
+	GetDatabaseUsername() string
+	GetDatabasePassword() string
+	GetDatabaseHost() string
+	GetDatabasePort() int
+	GetDatabaseName() string
+	GetDatabaseType() string
 }
 
 type database struct {
