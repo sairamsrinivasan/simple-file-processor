@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
 	"strconv"
 )
 
 type config struct {
-	db      database `json:"database"`
+	DB      database `json:"database"`
 	Service service  `json:"service"`
 	Routes  []Routes `json:"routes"`
 }
@@ -65,7 +64,13 @@ func NewConfig() config {
 
 // returns the port from the configuration
 func (c *config) GetPort() int {
-	return c.Service.Port
+	p := GetEnv("APP_PORT")
+	if p == "" {
+		return c.Service.Port
+	}
+
+	port, _ := strconv.Atoi(p)
+	return port
 }
 
 // returns the routes from the configuration
@@ -74,32 +79,22 @@ func (c *config) GetRoutes() []Routes {
 }
 
 func (c *config) GetDB() database {
-	return c.db
+	return c.DB
 }
 
-var pwd string
-
 func (c *config) GetDatabasePassword() string {
-	if pwd != "" {
-		return pwd
-	}
-
-	pwd = GetEnv("PSQL_FILE_DATABASE_PASSWORD")
-	if pwd == "" {
+	p := GetEnv("PSQL_FILE_DATABASE_PASSWORD")
+	if p == "" {
 		return c.GetDB().Password
 	}
 
-	return pwd
+	return p
 }
 
 var uname string
 
 func (c *config) GetDatabaseUsername() string {
-	if uname != "" {
-		return uname
-	}
-
-	uname = GetEnv("PSQL_FILE_DATABASE_USERNAME")
+	uname := GetEnv("PSQL_FILE_DATABASE_USERNAME")
 	if uname == "" {
 		return c.GetDB().Username
 	}
@@ -108,12 +103,12 @@ func (c *config) GetDatabaseUsername() string {
 }
 
 func (c *config) GetDatabaseHost() string {
-	host := GetEnv("DB_HOST")
-	if host == "" {
+	h := GetEnv("DB_HOST")
+	if h == "" {
 		return c.GetDB().Host
 	}
 
-	return host
+	return h
 }
 
 func (c *config) GetDatabasePort() int {
@@ -122,14 +117,8 @@ func (c *config) GetDatabasePort() int {
 		return c.GetDB().Port
 	}
 
-	p_int, err := strconv.Atoi(p)
-
-	if err != nil {
-		fmt.Println("Error converting DB_PORT to int: ", err)
-		return c.GetDB().Port
-	}
-
-	return p_int
+	port, _ := strconv.Atoi(p)
+	return port
 }
 
 func (c *config) GetDatabaseName() string {

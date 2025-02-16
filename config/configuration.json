@@ -20,7 +20,7 @@
         "type": "postgres",
         "host": "localhost",
         "port": 5432,
-        "username": "user",
+        "username": "username",
         "password": "password",
         "database": "file_processor"
     }
