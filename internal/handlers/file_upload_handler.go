@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -61,6 +62,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	file := models.File{
 		ID:                id,
 		GeneratedName:     gn,
+		MimeType:          inf.Header.Get("Content-Type"),
 		OriginalName:      inf.Filename,
 		Size:              inf.Size,
 		StoragePath:       up,
@@ -76,7 +78,8 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return success response
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message": "File uploaded successfully"}`))
+	resp, _ := json.Marshal(file)
+	w.Write(resp)
 
 	// Log the file upload
 	h.log.Info().Str("file_id", id).
