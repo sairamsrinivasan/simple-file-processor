@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"simple-file-processor/internal/db"
 
 	"github.com/rs/zerolog"
 )
@@ -9,15 +10,17 @@ import (
 type handler struct {
 	handlers map[string]func(w http.ResponseWriter, r *http.Request)
 	log      zerolog.Logger
+	db       *db.DB
 }
 
 type Handlers interface {
 	GetHandler(name string) func(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandlers(log zerolog.Logger) *handler {
+func NewHandlers(log zerolog.Logger, db *db.DB) Handlers {
 	h := &handler{
 		log: log,
+		db:  db,
 	}
 
 	// Initialize the handlers map

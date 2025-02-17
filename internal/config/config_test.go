@@ -23,6 +23,7 @@ func TestConfig(t *testing.T) {
 	t.Run("GetDatabasePassword", func(t *testing.T) {
 
 		t.Run("Default Password", func(t *testing.T) {
+			os.Unsetenv("PSQL_FILE_DATABASE_PASSWORD")
 			assert.Equal(t, c.GetDatabasePassword(), "password")
 		})
 
@@ -36,6 +37,7 @@ func TestConfig(t *testing.T) {
 	// Test Getting the Database Username
 	t.Run("GetDatabaseUsername", func(t *testing.T) {
 		t.Run("Default Username", func(t *testing.T) {
+			os.Unsetenv("PSQL_FILE_DATABASE_USERNAME")
 			assert.Equal(t, c.GetDatabaseUsername(), "username")
 		})
 

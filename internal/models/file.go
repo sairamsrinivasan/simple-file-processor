@@ -1,15 +1,17 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type File struct {
-	ID          string    `sql:"type:uuid;primary_key;default:uuid_generate_v4()"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Name        string    `json:"name"`
-	Extension   string    `json:"extension"`
-	StoragePath string    `json:"storage_path"`
-	Size        int64     `json:"size"`
+	ID                string    `gorm:"type:uuid;default:gen_random_uuid();primary_key"`
+	GeneratedName     string    `json:"generated_name"`     // e.g. file name without extension
+	MimeType          string    `json:"mime_type"`          // e.g. file mime type
+	OriginalName      string    `json:"original_name"`      // e.g. file name with extension
+	Size              int64     `json:"size"`               // e.g. file size in bytes
+	Status            string    `json:"status"`             // e.g. pending, processing, completed, failed
+	StoragePath       string    `json:"storage_path"`       // e.g. path where the file is stored
+	Type              string    `json:"type"`               // e.g. image, video, document, etc.
+	UploadedExtension string    `json:"uploaded_extension"` // e.g. file extension
+	CreatedAt         time.Time `gorm:"autoCreateTime"`
+	UpdatedAt         time.Time `gorm:"autoUpdateTime"`
 }

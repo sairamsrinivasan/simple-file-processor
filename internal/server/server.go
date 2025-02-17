@@ -15,7 +15,6 @@ type server struct {
 	conf   config.Config
 	router Router
 	log    zerolog.Logger
-	db     db.DB
 }
 
 type Server interface {
@@ -26,15 +25,14 @@ func NewServer() Server {
 	c := config.NewConfig()
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	l := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
-	r := NewRouter(&c, l)
 	db := db.NewDB(c.GetConnectionString(), l)
-
+	r := NewRouter(&c, l, db)
+	db.Migrate() // Migrate the database schema
 	// Initialize the server with the given configuration
 	return &server{
 		conf:   &c,
 		router: r,
 		log:    l,
-		db:     db,
 	}
 }
 
