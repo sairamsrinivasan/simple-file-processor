@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -47,7 +48,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		tExt = "unknown" // if no extension is provided
 	}
 
-	gn := filepath.Join(id, inf.Filename)
+	gn := fmt.Sprintf("%s%s", id, ext)
 	up := filepath.Join(uploadBase, gn)
 
 	// Create the file on the "server" (file system)
