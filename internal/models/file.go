@@ -1,6 +1,7 @@
 package models
 
 import (
+	"slices"
 	"time"
 
 	"gorm.io/gorm"
@@ -22,20 +23,10 @@ type File struct {
 	UpdatedAt         time.Time `gorm:"autoUpdateTime"`
 }
 
-// contains checks if a slice contains a specific element
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}
-
 func (f *File) BeforeCreate(tx *gorm.DB) (err error) {
 	// Set the type based on the mime type
 	if f.Type == "" {
-		if contains(imageTypes, f.MimeType) {
+		if slices.Contains(imageTypes, f.MimeType) {
 			f.Type = "image"
 		} else {
 			f.Type = "other"
