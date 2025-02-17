@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -49,8 +48,15 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		tExt = "unknown" // if no extension is provided
 	}
 
-	gn := fmt.Sprintf("%s%s", id, ext)
+	gn := filepath.Join(id, inf.Filename)
 	up := filepath.Join(uploadBase, gn)
+
+	// Create the upload directory for the file
+	if err := os.MkdirAll(filepath.Join(uploadBase, id), os.ModePerm); err != nil {
+		h.log.Error().Err(err).Msg("Failed to create upload directory")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
 	// Create the file on the "server" (file system)
 	if err := CreateFile(up, f, h.log); err != nil {
@@ -77,15 +83,20 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return success response
-	w.WriteHeader(http.StatusCreated)
-	resp, _ := json.Marshal(file)
-	w.Write(resp)
+	Success(w, &file)
 
 	// Log the file upload
 	h.log.Info().Str("file_id", id).
 		Str("file_name", inf.Filename).
 		Str("stored_path", up).
 		Msg("File uploaded successfully")
+}
+
+func Success(w http.ResponseWriter, f *models.File) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	resp, _ := json.Marshal(f)
+	w.Write(resp)
 }
 
 func CreateFile(path string, f io.Reader, log zerolog.Logger) error {
