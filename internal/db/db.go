@@ -5,13 +5,20 @@ import (
 	"simple-file-processor/internal/models"
 
 	"github.com/rs/zerolog"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type DB struct {
-	Gdb *gorm.DB
+	Gdb GormDB
 	Log zerolog.Logger
+}
+
+// Wrapper interface for gorm.DB
+// So we can use dependency injection
+// for testing purposes
+type GormDB interface {
+	Create(interface{}) *gorm.DB
+	AutoMigrate(...interface{}) error
 }
 
 type Database interface {
@@ -19,16 +26,10 @@ type Database interface {
 	InsertFileMetadata(*models.File) error
 }
 
-// NewDB creates a new database instance with the given configuration
-func NewDB(connStr string, l zerolog.Logger) Database {
-	// Initialize the database with the given configuration
-	// and return the database instance
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
-	if err != nil {
-		l.Fatal().Err(err).Msg("Failed to connect to database")
-	}
-
-	return &DB{Gdb: db, Log: l} // No need to take address of an interface
+// NewDB creates a new database instance with the given configuration and gorm instance
+// the gorm instance is passed as an interface to allow for mocking in tests
+func NewDB(gdb GormDB, l zerolog.Logger) Database {
+	return &DB{Gdb: gdb, Log: l} // No need to take address of an interface
 }
 
 func (db DB) Migrate() error {

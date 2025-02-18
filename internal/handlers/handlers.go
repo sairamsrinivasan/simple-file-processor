@@ -24,6 +24,9 @@ func NewHandlers(log zerolog.Logger, db db.Database) Handlers {
 	}
 
 	// Initialize the handlers map
+	// Each handler services a specific route
+	// and is registered within the router
+	// and defined in the config file
 	h.Handlers = make(map[string]func(w http.ResponseWriter, r *http.Request))
 	h.Handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
 	h.Handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)

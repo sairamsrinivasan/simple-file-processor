@@ -6,6 +6,8 @@ import (
 	"simple-file-processor/internal/db"
 	"testing"
 
+	"simple-file-processor/internal/mocks"
+
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,9 +20,10 @@ var (
 
 func TestNewRouter(t *testing.T) {
 	os.Chdir("../..")
+	gdb := new(mocks.GormDB)
 	c := config.NewConfig()
 	l := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
-	d = db.NewDB(c.GetConnectionString(), l)
-	r := NewRouter(&c, l, d)
+	db := db.NewDB(gdb, l)
+	r := NewRouter(&c, l, db)
 	assert.NotNil(t, r)
 }
