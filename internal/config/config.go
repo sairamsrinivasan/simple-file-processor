@@ -44,7 +44,7 @@ type database struct {
 	Port     int    `json:"port"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Database string `json:"database"`
+	Name     string `json:"name"`
 }
 
 // NewConfig creates a new Config instance with default values
@@ -91,7 +91,7 @@ func (c *config) GetDB() database {
 }
 
 func (c *config) GetDatabasePassword() string {
-	p := GetEnv("PSQL_FILE_DATABASE_PASSWORD")
+	p := GetEnv("FILE_DATABASE_PASSWORD")
 	if p == "" {
 		return c.GetDB().Password
 	}
@@ -102,7 +102,7 @@ func (c *config) GetDatabasePassword() string {
 var uname string
 
 func (c *config) GetDatabaseUsername() string {
-	uname := GetEnv("PSQL_FILE_DATABASE_USERNAME")
+	uname := GetEnv("FILE_DATABASE_USERNAME")
 	if uname == "" {
 		return c.GetDB().Username
 	}
@@ -132,7 +132,7 @@ func (c *config) GetDatabasePort() int {
 func (c *config) GetDatabaseName() string {
 	name := GetEnv("DB_NAME")
 	if name == "" {
-		return c.GetDB().Database
+		return c.GetDB().Name
 	}
 
 	return name

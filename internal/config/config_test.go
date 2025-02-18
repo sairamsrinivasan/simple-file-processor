@@ -23,28 +23,28 @@ func TestConfig(t *testing.T) {
 	t.Run("GetDatabasePassword", func(t *testing.T) {
 
 		t.Run("Default Password", func(t *testing.T) {
-			os.Unsetenv("PSQL_FILE_DATABASE_PASSWORD")
+			os.Unsetenv("FILE_DATABASE_PASSWORD")
 			assert.Equal(t, c.GetDatabasePassword(), "password")
 		})
 
 		t.Run("Set Password", func(t *testing.T) {
-			os.Setenv("PSQL_FILE_DATABASE_PASSWORD", "test")
+			os.Setenv("FILE_DATABASE_PASSWORD", "test")
 			assert.Equal(t, c.GetDatabasePassword(), "test")
-			os.Unsetenv("PSQL_FILE_DATABASE_PASSWORD")
+			os.Unsetenv("FILE_DATABASE_PASSWORD")
 		})
 	})
 
 	// Test Getting the Database Username
 	t.Run("GetDatabaseUsername", func(t *testing.T) {
 		t.Run("Default Username", func(t *testing.T) {
-			os.Unsetenv("PSQL_FILE_DATABASE_USERNAME")
+			os.Unsetenv("FILE_DATABASE_USERNAME")
 			assert.Equal(t, c.GetDatabaseUsername(), "username")
 		})
 
 		t.Run("Set Username", func(t *testing.T) {
-			os.Setenv("PSQL_FILE_DATABASE_USERNAME", "test")
+			os.Setenv("FILE_DATABASE_USERNAME", "test")
 			assert.Equal(t, c.GetDatabaseUsername(), "test")
-			os.Unsetenv("PSQL_FILE_DATABASE_USERNAME")
+			os.Unsetenv("FILE_DATABASE_USERNAME")
 		})
 	})
 
