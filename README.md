@@ -52,6 +52,30 @@ run | starts the server and runs the application
 clean | cleans any binaries that were generated from building the project
 test | runs the unit tests for the project
 
+### Running the application
+
+This section covers running the application and starting the server. By default, the service is configured to listen on port 8080, but can be customized by the APP_PORT environment variable.
+
+1. Clean the project
+
+```
+make clean
+```
+
+2. Build the project
+
+```
+make build
+```
+
+3. Run the project & start the server
+
+```
+make run
+```
+
+To use the APIs, follow the API documentation within API.md
+
 
 
 

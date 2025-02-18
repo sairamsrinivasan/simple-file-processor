@@ -75,7 +75,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		UploadedExtension: tExt,
 	}
 
-	// Insert the file info into the database
+	// Insert the file metadata info into the database
 	if err := h.db.InsertFileMetadata(&file); err != nil {
 		h.log.Error().Err(err).Msg("Failed to insert file content into the database")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
