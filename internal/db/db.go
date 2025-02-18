@@ -16,11 +16,11 @@ type DB struct {
 
 type Database interface {
 	Migrate() error
-	InsertFileMetadata(*models.File)
+	InsertFileMetadata(*models.File) error
 }
 
 // NewDB creates a new database instance with the given configuration
-func NewDB(connStr string, l zerolog.Logger) *DB {
+func NewDB(connStr string, l zerolog.Logger) Database {
 	// Initialize the database with the given configuration
 	// and return the database instance
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
@@ -28,8 +28,7 @@ func NewDB(connStr string, l zerolog.Logger) *DB {
 		l.Fatal().Err(err).Msg("Failed to connect to database")
 	}
 
-	// Migrate the schema
-	return &DB{Gdb: db, Log: l}
+	return &DB{Gdb: db, Log: l} // No need to take address of an interface
 }
 
 func (db DB) Migrate() error {

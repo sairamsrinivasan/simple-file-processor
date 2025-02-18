@@ -13,7 +13,7 @@ import (
 var (
 	c *config.Config
 	l zerolog.Logger
-	d *db.DB
+	d db.Database
 )
 
 func TestNewRouter(t *testing.T) {

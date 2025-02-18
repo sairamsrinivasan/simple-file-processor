@@ -22,7 +22,7 @@ type Router interface {
 	GetRouter() *mux.Router
 }
 
-func NewRouter(c config.Config, log zerolog.Logger, db *db.DB) Router {
+func NewRouter(c config.Config, log zerolog.Logger, db db.Database) Router {
 	// Initialize the router with the given configuration
 	// and return the router instance
 	return &router{

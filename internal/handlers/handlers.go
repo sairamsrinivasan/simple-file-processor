@@ -8,32 +8,32 @@ import (
 )
 
 type handler struct {
-	handlers map[string]func(w http.ResponseWriter, r *http.Request)
+	Handlers map[string]func(w http.ResponseWriter, r *http.Request)
 	log      zerolog.Logger
-	db       *db.DB
+	db       db.Database
 }
 
 type Handlers interface {
 	GetHandler(name string) func(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandlers(log zerolog.Logger, db *db.DB) Handlers {
+func NewHandlers(log zerolog.Logger, db db.Database) Handlers {
 	h := &handler{
 		log: log,
 		db:  db,
 	}
 
 	// Initialize the handlers map
-	h.handlers = make(map[string]func(w http.ResponseWriter, r *http.Request))
-	h.handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
-	h.handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)
+	h.Handlers = make(map[string]func(w http.ResponseWriter, r *http.Request))
+	h.Handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
+	h.Handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)
 
 	return h
 }
 
 func (h handler) GetHandler(name string) func(w http.ResponseWriter, r *http.Request) {
 	h.log.Debug().Msg("Getting handler for name: " + name)
-	if hand, ok := h.handlers[name]; ok {
+	if hand, ok := h.Handlers[name]; ok {
 		h.log.Debug().Msg("Handler found for name: " + name)
 		return hand
 	}

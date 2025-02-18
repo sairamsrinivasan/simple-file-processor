@@ -19,7 +19,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the multipart form data
 	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		http.Error(w, "File is too large", http.StatusRequestEntityTooLarge)
 		return
 	}
 
@@ -29,8 +29,8 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	defer f.Close()
 
+	defer f.Close()
 	// Create the upload directory if it doesn't exist
 	if err := os.MkdirAll(uploadBase, os.ModePerm); err != nil {
 		h.log.Error().Err(err).Msg("Failed to create upload directory")
