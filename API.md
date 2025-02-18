@@ -2,11 +2,11 @@
 
 The API documentation covers the APIs exposed by the service. It gives an overview about the request method, payloads, and responses that each API returns.
 
+Each API can be invoked and configured through the ReST client of your choice.
+
 #### POST - /upload
 
-The upload API is the entry point for the file upload, storage, and processing flows. Each API can be invoked through the ReST client of your choice. 
-
-Currently, the upload API contains a limit of 10MB.
+The upload API is the entry point for the file upload, storage, and processing flows. Currently, the upload API contains a limit of 10MB.
 
 + Request 
 
