@@ -1,7 +1,11 @@
 BINARY_NAME = simple-file-processor
 
 # Default target to build the application
-all: build
+all: 
+	@echo "Starting the build process..."
+	build
+	@echo "Build process complete. To run the application, use 'make run'."
+	@echo "To clean up, use 'make clean'."
 
 build: 
 	@echo "Building the application..."

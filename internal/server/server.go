@@ -34,11 +34,11 @@ func NewServer() Server {
 	}
 
 	db := db.NewDB(gdb, l)
-	r := NewRouter(&c, l, db)
+	r := NewRouter(c, l, db)
 	db.Migrate() // Migrate the database schema
 	// Initialize the server with the given configuration
 	return &server{
-		conf:   &c,
+		conf:   c,
 		router: r,
 		log:    l,
 	}

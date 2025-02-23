@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	c *config.Config
+	c config.Config
 	l zerolog.Logger
 	d db.Database
 )
@@ -24,6 +24,6 @@ func TestNewRouter(t *testing.T) {
 	c := config.NewConfig()
 	l := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
 	db := db.NewDB(gdb, l)
-	r := NewRouter(&c, l, db)
+	r := NewRouter(c, l, db)
 	assert.NotNil(t, r)
 }

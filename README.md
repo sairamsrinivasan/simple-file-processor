@@ -38,7 +38,7 @@ This project uses PostgreSQL to store file metadata information. Database creden
 | PSQL_FILE_DATABASE_PASSWORD  | The password to the postgres database |
 | DB_HOST | This is the database host, if running locally, this will be "localhost" |
 | DB_PORT | The port used to establish the database connection, by default it is configured to be 5432 |
-| DB_NAME | The name of the database which will hold all tables related to the storing metadata information about the file. The database name by default is "file_processor"
+| DB_NAME | The name of the database which will hold all tables related to the storing metadata information about the file. The database name by default is "file_processor" |
 
 ### Makefile Targets
 
@@ -46,13 +46,13 @@ The project's root Makefile configures run targets that are essential to buildin
 
 The following run targets are used:
 
-| TARGET | Description |
+| Target | Description |
 | -------- | ----------|
 |all | builds the project |
-build | builds the project |
-run | starts the server and runs the application |
-clean | cleans any binaries that were generated from building the project |
-test | runs the unit tests for the project |
+|build | builds the project |
+|run | starts the server and runs the application |
+|clean | cleans any binaries that were generated from building the project |
+|test | runs the unit tests for the project |
 
 ### Running the application
 

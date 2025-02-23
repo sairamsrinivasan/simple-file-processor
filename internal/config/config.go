@@ -10,7 +10,7 @@ import (
 type config struct {
 	DB      database `json:"database"`
 	Service service  `json:"service"`
-	Routes  []Routes `json:"routes"`
+	Routes  []routes `json:"routes"`
 }
 
 type service struct {
@@ -19,7 +19,7 @@ type service struct {
 	Port    int    `json:"port"`
 }
 
-type Routes struct {
+type routes struct {
 	Path    string `json:"path"`
 	Handler string `json:"handler"`
 	Method  string `json:"method"`
@@ -27,7 +27,7 @@ type Routes struct {
 
 type Config interface {
 	GetPort() int
-	GetRoutes() []Routes
+	GetRoutes() []routes
 	GetDB() database
 	GetDatabaseUsername() string
 	GetDatabasePassword() string
@@ -48,7 +48,7 @@ type database struct {
 }
 
 // NewConfig creates a new Config instance with default values
-func NewConfig() config {
+func NewConfig() Config {
 	c := &config{}
 
 	// load the configuratiion file using runtime
@@ -67,7 +67,7 @@ func NewConfig() config {
 	}
 
 	// return the Config struct
-	return *c
+	return c
 }
 
 // returns the port from the configuration
@@ -82,7 +82,7 @@ func (c *config) GetPort() int {
 }
 
 // returns the routes from the configuration
-func (c *config) GetRoutes() []Routes {
+func (c *config) GetRoutes() []routes {
 	return c.Routes
 }
 
