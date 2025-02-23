@@ -18,6 +18,7 @@ var (
 	d db.Database
 )
 
+// Verifies that the router can be initialized with the given configuration
 func TestNewRouter(t *testing.T) {
 	os.Chdir("../..")
 	gdb := new(mocks.GormDB)

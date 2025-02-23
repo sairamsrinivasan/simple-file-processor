@@ -9,21 +9,21 @@ import (
 )
 
 type handler struct {
-	Handlers    map[string]func(w http.ResponseWriter, r *http.Request)
-	log         zerolog.Logger
-	db          db.Database
-	asyncClient *asynq.Client
+	Handlers map[string]func(w http.ResponseWriter, r *http.Request)
+	log      zerolog.Logger
+	db       db.Database
+	ac       *asynq.Client
 }
 
 type Handlers interface {
 	GetHandler(name string) func(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandlers(log zerolog.Logger, db db.Database, c *asynq.Client) Handlers {
+func NewHandlers(log zerolog.Logger, db db.Database, ac *asynq.Client) Handlers {
 	h := &handler{
-		log:         log,
-		db:          db,
-		asyncClient: c,
+		log: log,
+		db:  db,
+		ac:  ac,
 	}
 
 	// Initialize the handlers map

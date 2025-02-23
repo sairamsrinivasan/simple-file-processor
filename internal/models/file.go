@@ -2,12 +2,13 @@ package models
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
 )
 
-var imageTypes = []string{"image/jpeg", "image/png", "image/gif"}
+var imageTypes = []string{"image/jpeg", "image/png", "image/gif", "image/jpg"} // Supported image types
 
 type File struct {
 	ID                string    `gorm:"type:uuid;default:gen_random_uuid();primary_key"`
@@ -23,6 +24,7 @@ type File struct {
 	UpdatedAt         time.Time `gorm:"autoUpdateTime"`
 }
 
+// A callback that is executed before a file is created
 func (f *File) BeforeCreate(tx *gorm.DB) (err error) {
 	// Set the type based on the mime type
 	if f.Type == "" {
@@ -34,4 +36,15 @@ func (f *File) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 
 	return nil
+}
+
+func (f *File) IsImage() bool {
+	// Check if the file is an image
+	if f.Type != "image" {
+		return false
+	}
+
+	// Check if the file extension is valid
+	ext := strings.ToLower(f.UploadedExtension)
+	return ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif"
 }
