@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	taskName = "image:resize" // Name of the task
+	ImageResizeTaskType = "image:resize" // Name of the task
 )
 
 type ImageResizeTaskPayload struct {
@@ -45,7 +45,7 @@ func (i *imageResizeClient) Enqueue(p *ImageResizeTaskPayload) error {
 	}
 
 	// Create a new task with the given payload
-	task := asynq.NewTask(taskName, payload)
+	task := asynq.NewTask(ImageResizeTaskType, payload)
 	// Enqueue the task with the client
 	_, err = i.client.Enqueue(task)
 	if err != nil {
