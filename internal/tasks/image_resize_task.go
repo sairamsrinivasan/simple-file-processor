@@ -11,6 +11,7 @@ const (
 	ImageResizeTaskType = "image:resize" // Name of the task
 )
 
+// Holds the payload for the image resize task
 type ImageResizeTaskPayload struct {
 	Width        int    `json:"width"`
 	Height       int    `json:"height"`
@@ -19,16 +20,19 @@ type ImageResizeTaskPayload struct {
 	OriginalName string `json:"original_name"`
 }
 
+// The client that will be used to enqueue the image resize task
 type imageResizeClient struct {
 	client *asynq.Client  // Client to interact with the task queue
 	log    zerolog.Logger // Logger to log messages
 }
 
+// ImageResizeTask interface defines the methods that the image resize task client should implement
 type ImageResizeTask interface {
 	// Name returns the name of the tas
 	Enqueue(payload *ImageResizeTaskPayload) error
 }
 
+// Constructs a client for the image resize task
 func NewImageResizeTask(c *asynq.Client, l zerolog.Logger) ImageResizeTask {
 	return &imageResizeClient{
 		client: c,
@@ -36,6 +40,7 @@ func NewImageResizeTask(c *asynq.Client, l zerolog.Logger) ImageResizeTask {
 	}
 }
 
+// Enqueues the image resize task with the given payload
 func (i *imageResizeClient) Enqueue(p *ImageResizeTaskPayload) error {
 	// Enqueue the task with the given payload
 	payload, err := json.Marshal(p)

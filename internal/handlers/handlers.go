@@ -4,23 +4,26 @@ import (
 	"net/http"
 	"simple-file-processor/internal/db"
 
+	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 )
 
 type handler struct {
-	Handlers map[string]func(w http.ResponseWriter, r *http.Request)
-	log      zerolog.Logger
-	db       db.Database
+	Handlers    map[string]func(w http.ResponseWriter, r *http.Request)
+	log         zerolog.Logger
+	db          db.Database
+	asyncClient *asynq.Client
 }
 
 type Handlers interface {
 	GetHandler(name string) func(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandlers(log zerolog.Logger, db db.Database) Handlers {
+func NewHandlers(log zerolog.Logger, db db.Database, c *asynq.Client) Handlers {
 	h := &handler{
-		log: log,
-		db:  db,
+		log:         log,
+		db:          db,
+		asyncClient: c,
 	}
 
 	// Initialize the handlers map
@@ -30,7 +33,6 @@ func NewHandlers(log zerolog.Logger, db db.Database) Handlers {
 	h.Handlers = make(map[string]func(w http.ResponseWriter, r *http.Request))
 	h.Handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
 	h.Handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)
-
 	return h
 }
 

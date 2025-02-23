@@ -47,5 +47,5 @@ func NewServer() Server {
 func (s *server) Start() error {
 	s.log.Info().Msg("Starting server on port " + strconv.Itoa(s.conf.Port()))
 	s.router.InitRoutes()
-	return http.ListenAndServe(fmt.Sprintf(":%d", s.conf.Port()), s.router.GetRouter())
+	return http.ListenAndServe(fmt.Sprintf(":%d", s.conf.Port()), s.router.Router())
 }
