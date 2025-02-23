@@ -11,6 +11,7 @@ type config struct {
 	DB      database `json:"database"`
 	Service service  `json:"service"`
 	Routes  []routes `json:"routes"`
+	Redis   redis    `json:"redis"`
 }
 
 type service struct {
@@ -25,19 +26,6 @@ type routes struct {
 	Method  string `json:"method"`
 }
 
-type Config interface {
-	GetPort() int
-	GetRoutes() []routes
-	GetDB() database
-	GetDatabaseUsername() string
-	GetDatabasePassword() string
-	GetDatabaseHost() string
-	GetDatabasePort() int
-	GetDatabaseName() string
-	GetDatabaseType() string
-	GetConnectionString() string
-}
-
 type database struct {
 	Type     string `json:"type"`
 	Host     string `json:"host"`
@@ -45,6 +33,27 @@ type database struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Name     string `json:"name"`
+}
+
+type redis struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Password string `json:"password"`
+	Database int    `json:"database"`
+}
+
+type Config interface {
+	Port() int
+	GetRoutes() []routes
+	GetDB() database
+	DatabaseUsername() string
+	DatabasePassword() string
+	DatabaseHost() string
+	DatabasePort() int
+	DatabaseName() string
+	DatabaseType() string
+	ConnectionString() string
+	RedisURL() string
 }
 
 // NewConfig creates a new Config instance with default values
@@ -71,12 +80,8 @@ func NewConfig() Config {
 }
 
 // returns the port from the configuration
-func (c *config) GetPort() int {
-	p := GetEnv("APP_PORT")
-	if p == "" {
-		return c.Service.Port
-	}
-
+func (c *config) Port() int {
+	p := EnvOrDefault("APP_PORT", strconv.Itoa(c.Service.Port))
 	port, _ := strconv.Atoi(p)
 	return port
 }
@@ -90,78 +95,53 @@ func (c *config) GetDB() database {
 	return c.DB
 }
 
-func (c *config) GetDatabasePassword() string {
-	p := GetEnv("FILE_DATABASE_PASSWORD")
-	if p == "" {
-		return c.GetDB().Password
-	}
-
-	return p
+func (c *config) DatabasePassword() string {
+	return EnvOrDefault("FILE_DATABASE_PASSWORD", c.DB.Password)
 }
 
 var uname string
 
-func (c *config) GetDatabaseUsername() string {
-	uname := GetEnv("FILE_DATABASE_USERNAME")
-	if uname == "" {
-		return c.GetDB().Username
-	}
-
-	return uname
+func (c *config) DatabaseUsername() string {
+	return EnvOrDefault("FILE_DATABASE_USERNAME", c.DB.Username)
 }
 
-func (c *config) GetDatabaseHost() string {
-	h := GetEnv("DB_HOST")
-	if h == "" {
-		return c.GetDB().Host
-	}
-
-	return h
+func (c *config) DatabaseHost() string {
+	return EnvOrDefault("DB_HOST", c.DB.Host)
 }
 
-func (c *config) GetDatabasePort() int {
-	p := GetEnv("DB_PORT")
-	if p == "" {
-		return c.GetDB().Port
-	}
-
+func (c *config) DatabasePort() int {
+	p := EnvOrDefault("DB_PORT", strconv.Itoa(c.DB.Port))
 	port, _ := strconv.Atoi(p)
 	return port
 }
 
-func (c *config) GetDatabaseName() string {
-	name := GetEnv("DB_NAME")
-	if name == "" {
-		return c.GetDB().Name
-	}
-
-	return name
+func (c *config) DatabaseName() string {
+	return EnvOrDefault("DB_NAME", c.DB.Name)
 }
 
 // returns the database type eg. postgres, mysql, etc
-func (c *config) GetDatabaseType() string {
-	t := GetEnv("DB_TYPE")
-	if t == "" {
-		return c.GetDB().Type
-	}
-
-	return t
+func (c *config) DatabaseType() string {
+	return EnvOrDefault("DB_TYPE", c.DB.Type)
 }
 
 // returns the connection string for the database
-func (c *config) GetConnectionString() string {
+func (c *config) ConnectionString() string {
 	// Construct the database connection string here'
-	str := fmt.Sprintf("%s:%s@%s:%d/%s?sslmode=disable", c.GetDatabaseUsername(), c.GetDatabasePassword(), c.GetDatabaseHost(), c.GetDatabasePort(), c.GetDatabaseName())
-
-	return c.GetDatabaseType() + "://" + str
+	str := fmt.Sprintf("%s:%s@%s:%d/%s?sslmode=disable", c.DatabaseUsername(), c.DatabasePassword(), c.DatabaseHost(), c.DatabasePort(), c.DatabaseName())
+	return c.DatabaseType() + "://" + str
 }
 
-func GetEnv(key string) string {
+func (c *config) RedisURL() string {
+	// Construct the redis connection string here
+	str := fmt.Sprintf("redis://%s:%d/%d", c.Redis.Host, c.Redis.Port, c.Redis.Database)
+	return str
+}
+
+func EnvOrDefault(key string, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
-		fmt.Println("Environment variable not set: ", key)
-
-		return ""
+		fmt.Println("Environment variable not set, using default value in config: ")
+		return defaultValue
 	}
 
 	return value

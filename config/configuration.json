@@ -23,5 +23,10 @@
         "username": "username",
         "password": "password",
         "name": "file_processor"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "db": 0
     }
 }

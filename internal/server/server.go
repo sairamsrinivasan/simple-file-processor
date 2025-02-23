@@ -27,7 +27,7 @@ func NewServer() Server {
 	c := config.NewConfig()
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	l := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
-	gdb, err := gorm.Open(postgres.Open(c.GetConnectionString()), &gorm.Config{})
+	gdb, err := gorm.Open(postgres.Open(c.ConnectionString()), &gorm.Config{})
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to connect to database")
 		panic(err)
@@ -45,7 +45,7 @@ func NewServer() Server {
 }
 
 func (s *server) Start() error {
-	s.log.Info().Msg("Starting server on port " + strconv.Itoa(s.conf.GetPort()))
+	s.log.Info().Msg("Starting server on port " + strconv.Itoa(s.conf.Port()))
 	s.router.InitRoutes()
-	return http.ListenAndServe(fmt.Sprintf(":%d", s.conf.GetPort()), s.router.GetRouter())
+	return http.ListenAndServe(fmt.Sprintf(":%d", s.conf.Port()), s.router.GetRouter())
 }
