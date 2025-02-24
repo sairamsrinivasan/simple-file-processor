@@ -53,6 +53,8 @@ type Config interface {
 	DatabaseName() string
 	DatabaseType() string
 	ConnectionString() string
+	RedisAddress() string
+	RedisDB() int
 	RedisURL() string
 }
 
@@ -137,10 +139,21 @@ func (c *config) RedisURL() string {
 	return str
 }
 
+func (c *config) RedisAddress() string {
+	// Construct the address for the redis server
+	// includes the host and port
+	return fmt.Sprintf("%s:%d", c.Redis.Host, c.Redis.Port)
+}
+
+func (c *config) RedisDB() int {
+	// returns the redis database number
+	return c.Redis.Database
+}
+
 func EnvOrDefault(key string, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
-		fmt.Println("Environment variable not set, using default value in config: ")
+		fmt.Printf("Environment variable %s not set, using default value.\n", key)
 		return defaultValue
 	}
 

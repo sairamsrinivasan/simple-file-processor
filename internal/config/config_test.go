@@ -20,7 +20,7 @@ func TestConfig(t *testing.T) {
 	c := NewConfig()
 
 	// Test Getting the Database Password
-	t.Run("GetDatabasePassword", func(t *testing.T) {
+	t.Run("DatabasePassword", func(t *testing.T) {
 
 		t.Run("Default Password", func(t *testing.T) {
 			os.Unsetenv("FILE_DATABASE_PASSWORD")
@@ -35,7 +35,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the Database Username
-	t.Run("GetDatabaseUsername", func(t *testing.T) {
+	t.Run("DatabaseUsername", func(t *testing.T) {
 		t.Run("Default Username", func(t *testing.T) {
 			os.Unsetenv("FILE_DATABASE_USERNAME")
 			assert.Equal(t, c.DatabaseUsername(), "username")
@@ -49,7 +49,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the Database Port
-	t.Run("GetDatabasePort", func(t *testing.T) {
+	t.Run("DatabasePort", func(t *testing.T) {
 		t.Run("Default Port", func(t *testing.T) {
 			assert.Equal(t, c.DatabasePort(), 5432)
 		})
@@ -62,7 +62,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the Service Port
-	t.Run("GetPort", func(t *testing.T) {
+	t.Run("Port", func(t *testing.T) {
 		t.Run("Default Port", func(t *testing.T) {
 			assert.Equal(t, c.Port(), 8080)
 		})
@@ -75,7 +75,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the database name
-	t.Run("GetDatabaseName", func(t *testing.T) {
+	t.Run("DatabaseName", func(t *testing.T) {
 		t.Run("Default Name", func(t *testing.T) {
 			assert.Equal(t, c.DatabaseName(), "file_processor")
 		})
@@ -88,7 +88,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the database host
-	t.Run("GetDatabaseHost", func(t *testing.T) {
+	t.Run("DatabaseHost", func(t *testing.T) {
 		t.Run("Default Host", func(t *testing.T) {
 			assert.Equal(t, c.DatabaseHost(), "localhost")
 		})
@@ -101,7 +101,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the database type
-	t.Run("GetDatabaseType", func(t *testing.T) {
+	t.Run("DatabaseType", func(t *testing.T) {
 		t.Run("Default Type", func(t *testing.T) {
 			assert.Equal(t, c.DatabaseType(), "postgres")
 		})
@@ -114,14 +114,26 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test Getting the connection string for the database
-	t.Run("GetConnectionString", func(t *testing.T) {
+	t.Run("ConnectionString", func(t *testing.T) {
 		assert.Equal(t, c.ConnectionString(), "postgres://username:password@localhost:5432/file_processor?sslmode=disable")
 	})
 
 	// Test Getting the Redis URL
-	t.Run("GetRedisURL", func(t *testing.T) {
+	t.Run("RedisURL", func(t *testing.T) {
 		t.Run("Default URL", func(t *testing.T) {
 			assert.Equal(t, c.RedisURL(), "redis://localhost:6379/0")
+		})
+	})
+
+	t.Run("RedisAddress", func(t *testing.T) {
+		t.Run("Default Address", func(t *testing.T) {
+			assert.Equal(t, c.RedisAddress(), "localhost:6379")
+		})
+	})
+
+	t.Run("RedisDB", func(t *testing.T) {
+		t.Run("Default DB", func(t *testing.T) {
+			assert.Equal(t, c.RedisDB(), 0)
 		})
 	})
 }

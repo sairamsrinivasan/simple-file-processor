@@ -39,7 +39,7 @@ func NewRouter(c config.Config, log zerolog.Logger, db db.Database) Router {
 // AsyncClient initializes the async client
 // This is used to send tasks to the async worker
 func AsyncClient(c config.Config) tasks.Client {
-	return tasks.NewAsyncClient(c.RedisURL())
+	return tasks.NewAsyncClient(c.RedisAddress(), c.RedisDB())
 }
 
 // Initializes the routes for the server using the configuration

@@ -17,9 +17,9 @@ type Client interface {
 
 // Initializes a new async client
 // with the given redis address
-func NewAsyncClient(rAddr string) Client {
+func NewAsyncClient(rAddr string, rDB int) Client {
 	return &async{
-		client: asynq.NewClient(asynq.RedisClientOpt{Addr: rAddr}),
+		client: asynq.NewClient(asynq.RedisClientOpt{Addr: rAddr, DB: rDB}),
 	}
 }
 

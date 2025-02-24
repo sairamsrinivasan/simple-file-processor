@@ -86,14 +86,14 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Return success response
 	Success(w, file)
 
-	// Enqueue the file for processing
-	h.ProcessFile(file, h.log)
-
 	// Log the file upload
 	h.log.Info().Str("file_id", id).
 		Str("file_name", inf.Filename).
 		Str("stored_path", up).
 		Msg("File uploaded successfully")
+
+	// Enqueue the file for processing
+	h.ProcessFile(file, h.log)
 }
 
 func (h handler) ProcessFile(f *models.File, log zerolog.Logger) {
@@ -101,13 +101,16 @@ func (h handler) ProcessFile(f *models.File, log zerolog.Logger) {
 	// This will be handled by the async worker
 	// and will be processed in the background
 	if f.IsImage() {
-		h.ResizeImage(f, log)
+		err := h.ResizeImage(f, log)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to enqueue image resize task")
+		}
 	}
 }
 
 // A function that enqueues an image resize task
 // This will be handled by the async worker
-func (h handler) ResizeImage(f *models.File, log zerolog.Logger) {
+func (h handler) ResizeImage(f *models.File, log zerolog.Logger) error {
 	// Enqueue the image resize task
 	// This will be handled by the async worker
 	// and will be processed in the background
@@ -123,10 +126,12 @@ func (h handler) ResizeImage(f *models.File, log zerolog.Logger) {
 	// Enqueue the image resize task
 	if err := t.Enqueue(payload); err != nil {
 		log.Error().Err(err).Msg("Failed to enqueue image resize task")
+		return err
 	}
 
 	// Log the image resize task
 	log.Info().Str("file_id", f.ID).Msg("Image resize task enqueued")
+	return nil
 }
 
 func Success(w http.ResponseWriter, f *models.File) {
