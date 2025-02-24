@@ -5,9 +5,9 @@ import (
 	"simple-file-processor/internal/config"
 	"simple-file-processor/internal/db"
 	"simple-file-processor/internal/handlers"
+	"simple-file-processor/internal/tasks"
 
 	"github.com/gorilla/mux"
-	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 )
 
@@ -38,8 +38,8 @@ func NewRouter(c config.Config, log zerolog.Logger, db db.Database) Router {
 
 // AsyncClient initializes the async client
 // This is used to send tasks to the async worker
-func AsyncClient(c config.Config) *asynq.Client {
-	return asynq.NewClient(asynq.RedisClientOpt{Addr: c.RedisURL()})
+func AsyncClient(c config.Config) tasks.Client {
+	return tasks.NewAsyncClient(c.RedisURL())
 }
 
 // Initializes the routes for the server using the configuration

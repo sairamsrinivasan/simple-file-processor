@@ -1,0 +1,26 @@
+with-expecter: true
+packages:
+    simple-file-processor/internal/db:
+      config:
+      interfaces:
+        Database:
+          config:
+            filename: "mock_db.go"
+            dir: "internal/mocks/mockdb"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mockdb"
+        GormDB:
+          config:
+            filename: "mock_gorm_db.go"
+            dir: "internal/mocks/mockdb"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mockdb"
+    simple-file-processor/internal/tasks:
+      config:
+      interfaces:
+        Client:
+          config:
+            filename: "mock_client.go"
+            dir: "internal/mocks/mocktasks"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mocktasks"

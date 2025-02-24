@@ -5,20 +5,11 @@ import (
 	"simple-file-processor/internal/models"
 
 	"github.com/rs/zerolog"
-	"gorm.io/gorm"
 )
 
 type DB struct {
 	Gdb GormDB
 	Log zerolog.Logger
-}
-
-// Wrapper interface for gorm.DB
-// So we can use dependency injection
-// for testing purposes
-type GormDB interface {
-	Create(interface{}) *gorm.DB
-	AutoMigrate(...interface{}) error
 }
 
 type Database interface {

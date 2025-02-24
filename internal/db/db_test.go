@@ -2,7 +2,7 @@ package db
 
 import (
 	"errors"
-	"simple-file-processor/internal/mocks"
+	"simple-file-processor/internal/mocks/mockdb"
 	"simple-file-processor/internal/models"
 	"testing"
 
@@ -16,14 +16,14 @@ var (
 )
 
 func Test_NewDB_WhenCalled_ReturnsDB(t *testing.T) {
-	db := new(mocks.GormDB)
+	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
 	gdb := NewDB(db, l)
 	g.Expect(gdb).NotTo(gomega.BeNil())
 }
 
 func Test_Migrate_WhenCalled_ReturnsNil(t *testing.T) {
-	db := new(mocks.GormDB)
+	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
 	gdb := NewDB(db, l)
 	db.On("AutoMigrate", &models.File{}).Return(nil)
@@ -32,7 +32,7 @@ func Test_Migrate_WhenCalled_ReturnsNil(t *testing.T) {
 }
 
 func Test_Migrate_WhenErrorAutoMigrate_ReturnsError(t *testing.T) {
-	db := new(mocks.GormDB)
+	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
 	gdb := NewDB(db, l)
 	db.On("AutoMigrate", &models.File{}).Return(errors.New("error"))
@@ -41,7 +41,7 @@ func Test_Migrate_WhenErrorAutoMigrate_ReturnsError(t *testing.T) {
 }
 
 func Test_InsertFileMetadata_WhenNoError_ReturnsNil(t *testing.T) {
-	db := new(mocks.GormDB)
+	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
 	gdb := NewDB(db, l)
 	file := &models.File{
@@ -54,7 +54,7 @@ func Test_InsertFileMetadata_WhenNoError_ReturnsNil(t *testing.T) {
 }
 
 func Test_InsertFileMetadata_WhenError_ReturnsError(t *testing.T) {
-	db := new(mocks.GormDB)
+	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
 	gdb := NewDB(db, l)
 	file := &models.File{

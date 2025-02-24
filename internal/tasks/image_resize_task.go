@@ -22,7 +22,7 @@ type ImageResizeTaskPayload struct {
 
 // The client that will be used to enqueue the image resize task
 type imageResizeClient struct {
-	client *asynq.Client  // Client to interact with the task queue
+	client Client         // Client to interact with the task queue
 	log    zerolog.Logger // Logger to log messages
 }
 
@@ -33,7 +33,7 @@ type ImageResizeTask interface {
 }
 
 // Constructs a client for the image resize task
-func NewImageResizeTask(c *asynq.Client, l zerolog.Logger) ImageResizeTask {
+func NewImageResizeTask(c Client, l zerolog.Logger) ImageResizeTask {
 	return &imageResizeClient{
 		client: c,
 		log:    l,

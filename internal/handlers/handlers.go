@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 	"simple-file-processor/internal/db"
+	"simple-file-processor/internal/tasks"
 
-	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 )
 
@@ -12,14 +12,15 @@ type handler struct {
 	Handlers map[string]func(w http.ResponseWriter, r *http.Request)
 	log      zerolog.Logger
 	db       db.Database
-	ac       *asynq.Client
+	ac       tasks.Client
 }
 
 type Handlers interface {
 	GetHandler(name string) func(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandlers(log zerolog.Logger, db db.Database, ac *asynq.Client) Handlers {
+// Configures handlers for the server
+func NewHandlers(log zerolog.Logger, db db.Database, ac tasks.Client) Handlers {
 	h := &handler{
 		log: log,
 		db:  db,
