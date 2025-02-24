@@ -114,8 +114,7 @@ func (h handler) ResizeImage(f *models.File, log zerolog.Logger) error {
 	// Enqueue the image resize task
 	// This will be handled by the async worker
 	// and will be processed in the background
-	t := tasks.NewImageResizeTask(h.ac, log)
-	payload := &tasks.ImageResizeTaskPayload{
+	payload := &tasks.ImageResizePayload{
 		Width:        800,
 		Height:       600,
 		FileID:       f.ID,
@@ -123,8 +122,14 @@ func (h handler) ResizeImage(f *models.File, log zerolog.Logger) error {
 		OriginalName: f.OriginalName,
 	}
 
+	t, err := tasks.NewImageResizeTask(h.ac, log, payload)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create image resize task")
+		return err
+	}
+
 	// Enqueue the image resize task
-	if err := t.Enqueue(payload); err != nil {
+	if err := t.Enqueue(); err != nil {
 		log.Error().Err(err).Msg("Failed to enqueue image resize task")
 		return err
 	}

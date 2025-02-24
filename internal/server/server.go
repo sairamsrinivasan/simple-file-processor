@@ -33,9 +33,11 @@ func NewServer() Server {
 		panic(err)
 	}
 
-	db := db.NewDB(gdb, l)
-	r := NewRouter(c, l, db)
-	db.Migrate() // Migrate the database schema
+	db := db.NewDB(gdb, l)                                 // Initialize the database with the given configuration
+	r := NewRouter(c, l, db)                               // Initialize the router with the given configuration
+	db.Migrate()                                           // Migrate the database schema
+	go StartWorkerServer(c.RedisAddress(), c.RedisDB(), l) // Start the async worker
+
 	// Initialize the server with the given configuration
 	return &server{
 		conf:   c,

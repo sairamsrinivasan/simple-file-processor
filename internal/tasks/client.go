@@ -25,6 +25,9 @@ func NewAsyncClient(rAddr string, rDB int) Client {
 
 // Enqueues a task to the async worker
 func (a *async) Enqueue(task *asynq.Task, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	defer a.client.Close() // Close the client when done
+
+	// Enqueue the task with the given options
 	ti, err := a.client.Enqueue(task, opts...)
 	if err != nil {
 		return nil, err
