@@ -1,30 +1,70 @@
 package server
 
 import (
+	"fmt"
+	"os"
+	"os/signal"
 	"simple-file-processor/internal/tasks"
+	"syscall"
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 )
 
+type workerServer struct {
+	log   zerolog.Logger
+	rDB   int
+	rAddr string
+}
+
+type WorkerServer interface {
+	Start()
+}
+
+func NewWorkerServer(rAddr string, rDB int, log zerolog.Logger) WorkerServer {
+	return &workerServer{
+		log:   log,
+		rDB:   rDB,
+		rAddr: rAddr,
+	}
+}
+
 // A background worker server that processes tasks from the task queue
 // The worker server is responsible for consuming from the task queue
 // and delegating the tasks to the appropriate handlers
-func StartWorkerServer(rAddr string, rDB int, log zerolog.Logger) {
+func (ws *workerServer) Start() {
 	// Initialize the worker server with the given redis address and database
-	srv := asynq.NewServer(asynq.RedisClientOpt{Addr: rAddr, DB: rDB}, asynq.Config{
+	srv := asynq.NewServer(asynq.RedisClientOpt{Addr: ws.rAddr, DB: ws.rDB}, asynq.Config{
 		Concurrency: 10, // Set the concurrency level
 	})
 
 	mux := asynq.NewServeMux()
 
 	// Register the image resize handler with the task queue
-	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(log))
+	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.log))
 
-	log.Info().Msg("Starting worker server...")
+	ws.log.Info().Msg("Starting worker server...")
 
-	// Start the worker server with the given mux
-	if err := srv.Run(mux); err != nil {
-		log.Fatal().Err(err).Msg("Failed to start worker")
-	}
+	// Create a channel to listen for interrupt signals
+	c := make(chan os.Signal, 1)
+
+	// Listen for interrupt signals
+	// This will allow the server to gracefully shutdown
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // Notify the channel when an interrupt signal is
+
+	go func() {
+		// Start the worker server with the given mux
+		if err := srv.Run(mux); err != nil {
+			ws.log.Fatal().Err(err).Msg("Failed to start worker")
+		}
+	}()
+
+	// Wait for the signal
+	<-c
+	ws.log.Info().Msg("Received shutdown signal, shutting down worker server...")
+	srv.Shutdown() // Shutdown the server
+	fmt.Println("Server gracefully stopped")
+
+	// Exit the process
+	os.Exit(0)
 }
