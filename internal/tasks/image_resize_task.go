@@ -33,7 +33,7 @@ func NewImageResizeTask(c Client, l zerolog.Logger, p *ImageResizePayload) (Task
 		return nil, err
 	}
 
-	l.Info().Msg("Creating image resize task for file: " + p.FileID)
+	l.Info().Msg("Creating image resize task with payload: " + string(payload))
 	return &task{
 		client: c,
 		log:    l,
@@ -60,6 +60,6 @@ func (i *imageResizeHandler) ProcessTask(ctx context.Context, t *asynq.Task) err
 		return err
 	}
 
-	i.log.Info().Msg("Resizing image for file: " + p.FileID)
+	i.log.Info().Msg("Resizing image for file with payload: " + string(t.Payload()))
 	return nil
 }

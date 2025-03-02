@@ -1,6 +1,8 @@
 package tasks
 
 import (
+	"time"
+
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
 )
@@ -14,19 +16,19 @@ type task struct {
 
 // ImageResizeTask interface defines the methods that the image resize task client should implement
 type Task interface {
-	// Name returns the name of the tas
+	// Name returns the name of the task
 	Enqueue() error // Enqueues the task with the given payload
 }
 
 // Enqueues the image resize task with the given payload
 func (i *task) Enqueue() error {
 	// Enqueue the task with the given payload
-	_, err := i.client.Enqueue(i.task, asynq.MaxRetry(3), asynq.Timeout(60))
+	_, err := i.client.Enqueue(i.task, asynq.MaxRetry(3), asynq.Timeout(60*time.Second))
 	if err != nil {
-		i.log.Error().Err(err).Msg("Failed to enqueue image resize task for file: " + string(i.task.Payload()))
+		i.log.Error().Err(err).Msg("Failed to enqueue task with payload: " + string(i.task.Payload()))
 		return err
 	}
 
-	i.log.Info().Msg("Image resize task enqueued for file: " + string(i.task.Payload()))
+	i.log.Info().Msg("Enqueued task with payload: " + string(i.task.Payload()))
 	return nil
 }
