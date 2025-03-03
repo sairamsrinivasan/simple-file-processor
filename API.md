@@ -22,11 +22,11 @@ The upload API takes form data as input, with "file" as the key and the value be
     "original_name": "dj.jpeg",
     "size": 4417534,
     "status": "pending",
-    "storage_path": "uploads/a0de50ee-d9f6-4fc3-8b26-16242724f0e9/dj.jpeg",
+    "storage_path": "uploads/a0de50ee-d9f6-4fc3-8b26-16242724f0e9",
     "type": "image",
     "uploaded_extension": "jpeg",
-    "CreatedAt": "2025-02-17T19:40:06.612592-08:00",
-    "UpdatedAt": "2025-02-17T19:40:06.612592-08:00"
+    "created_at": "2025-02-17T19:40:06.612592-08:00",
+    "updated_at": "2025-02-17T19:40:06.612592-08:00"
 }
 ```
 
