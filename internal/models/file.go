@@ -40,11 +40,6 @@ func (f *File) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (f *File) IsImage() bool {
-	// Check if the file is an image
-	if f.Type != "image" {
-		return false
-	}
-
 	// Check if the file extension is valid
 	ext := strings.ToLower(f.UploadedExtension)
 	return ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif"

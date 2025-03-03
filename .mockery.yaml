@@ -24,3 +24,9 @@ packages:
             dir: "internal/mocks/mocktasks"
             mockname: "{{.InterfaceName}}"
             outpkg: "mocktasks"
+        Task:
+          config:
+            filename: "mock_task.go"
+            dir: "internal/mocks/mocktasks"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mocktasks"

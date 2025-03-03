@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -52,6 +53,11 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	gn := filepath.Join(id, inf.Filename)
 	up := filepath.Join(uploadBase, gn)
 	sp := filepath.Join(uploadBase, id)
+	mt := mime.TypeByExtension(ext)
+	if mt == "" {
+		mt = "application/octet-stream" // default mime type
+	}
+
 	// Create the upload directory for the file
 	if err := os.MkdirAll(filepath.Join(uploadBase, id), os.ModePerm); err != nil {
 		h.log.Error().Err(err).Msg("Failed to create upload directory")
@@ -69,7 +75,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	file := &models.File{
 		ID:                id,
 		GeneratedName:     gn,
-		MimeType:          inf.Header.Get("Content-Type"),
+		MimeType:          mt,
 		OriginalName:      inf.Filename,
 		Size:              inf.Size,
 		StoragePath:       sp,
