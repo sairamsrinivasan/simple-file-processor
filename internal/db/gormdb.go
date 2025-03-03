@@ -9,6 +9,7 @@ import (
 type GormDB interface {
 	Create(interface{}) *gorm.DB
 	AutoMigrate(...interface{}) error
+	Model(value interface{}) *gorm.DB
 }
 
 type gormDB struct {
@@ -27,4 +28,8 @@ func (gdb gormDB) Create(value interface{}) *gorm.DB {
 
 func (gdb gormDB) AutoMigrate(value ...interface{}) error {
 	return gdb.db.AutoMigrate(value...)
+}
+
+func (gdb gormDB) Model(value interface{}) *gorm.DB {
+	return gdb.db.Model(value)
 }

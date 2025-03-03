@@ -15,6 +15,8 @@ type DB struct {
 type Database interface {
 	Migrate() error
 	InsertFileMetadata(*models.File) error
+	AddProcessedOutput(string, models.ProcessedOutput) error
+	FileByID(string) (*models.File, error)
 }
 
 // NewDB creates a new database instance with the given configuration and gorm instance
@@ -37,6 +39,7 @@ func (db DB) Migrate() error {
 	return nil
 }
 
+// Insert file metadata into the database
 func (db DB) InsertFileMetadata(f *models.File) error {
 
 	// Insert the file content into the database
@@ -48,4 +51,36 @@ func (db DB) InsertFileMetadata(f *models.File) error {
 
 	db.Log.Info().Msg(fmt.Sprintf("File metadata inserted into the database: %s", f.OriginalName))
 	return nil
+}
+
+// Adds a processed output to the file
+func (db DB) AddProcessedOutput(fid string, po models.ProcessedOutput) error {
+	// Add the processed output to the file
+	db.Log.Info().Msg(fmt.Sprintf("Adding processed output to file: %s", fid))
+	f, err := db.FileByID(fid)
+	if err != nil {
+		return err
+	}
+
+	f.ProcessedOutputs = append(f.ProcessedOutputs, po)
+	if err := db.Gdb.Model(f).Update("processed_outputs", f.ProcessedOutputs).Error; err != nil {
+		db.Log.Error().Err(err).Msg("Failed to add processed output to file")
+		return err
+	}
+
+	db.Log.Info().Msg(fmt.Sprintf("Processed output added to file: %s", f.OriginalName))
+	return nil
+}
+
+// GetFileByID returns the file with the given ID
+func (db DB) FileByID(id string) (*models.File, error) {
+	db.Log.Info().Msg(fmt.Sprintf("Getting file with ID: %s", id))
+	f := &models.File{}
+	if err := db.Gdb.Model(f).First(f, "id = ?", id).Error; err != nil {
+		db.Log.Error().Err(err).Msg("Failed to get file by ID")
+		return nil, err
+	}
+
+	db.Log.Info().Msg(fmt.Sprintf("File with ID: %s found", id))
+	return f, nil
 }

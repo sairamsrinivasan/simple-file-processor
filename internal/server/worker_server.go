@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"simple-file-processor/internal/db"
 	"simple-file-processor/internal/tasks"
 	"syscall"
 
@@ -15,17 +16,19 @@ type workerServer struct {
 	log   zerolog.Logger
 	rDB   int
 	rAddr string
+	db    db.Database
 }
 
 type WorkerServer interface {
 	Start()
 }
 
-func NewWorkerServer(rAddr string, rDB int, log zerolog.Logger) WorkerServer {
+func NewWorkerServer(rAddr string, rDB int, db db.Database, log zerolog.Logger) WorkerServer {
 	return &workerServer{
 		log:   log,
 		rDB:   rDB,
 		rAddr: rAddr,
+		db:    db,
 	}
 }
 
@@ -41,7 +44,7 @@ func (ws *workerServer) Start() {
 	mux := asynq.NewServeMux()
 
 	// Register the image resize handler with the task queue
-	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.log))
+	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, ws.log))
 
 	ws.log.Info().Msg("Starting worker server...")
 

@@ -123,6 +123,54 @@ func (_c *GormDB_Create_Call) RunAndReturn(run func(interface{}) *gorm.DB) *Gorm
 	return _c
 }
 
+// Model provides a mock function with given fields: value
+func (_m *GormDB) Model(value interface{}) *gorm.DB {
+	ret := _m.Called(value)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Model")
+	}
+
+	var r0 *gorm.DB
+	if rf, ok := ret.Get(0).(func(interface{}) *gorm.DB); ok {
+		r0 = rf(value)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gorm.DB)
+		}
+	}
+
+	return r0
+}
+
+// GormDB_Model_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Model'
+type GormDB_Model_Call struct {
+	*mock.Call
+}
+
+// Model is a helper method to define mock.On call
+//   - value interface{}
+func (_e *GormDB_Expecter) Model(value interface{}) *GormDB_Model_Call {
+	return &GormDB_Model_Call{Call: _e.mock.On("Model", value)}
+}
+
+func (_c *GormDB_Model_Call) Run(run func(value interface{})) *GormDB_Model_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(interface{}))
+	})
+	return _c
+}
+
+func (_c *GormDB_Model_Call) Return(_a0 *gorm.DB) *GormDB_Model_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *GormDB_Model_Call) RunAndReturn(run func(interface{}) *gorm.DB) *GormDB_Model_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewGormDB creates a new instance of GormDB. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewGormDB(t interface {

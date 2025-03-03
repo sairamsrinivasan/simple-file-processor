@@ -51,7 +51,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	gn := filepath.Join(id, inf.Filename)
 	up := filepath.Join(uploadBase, gn)
-
+	sp := filepath.Join(uploadBase, id)
 	// Create the upload directory for the file
 	if err := os.MkdirAll(filepath.Join(uploadBase, id), os.ModePerm); err != nil {
 		h.log.Error().Err(err).Msg("Failed to create upload directory")
@@ -72,7 +72,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		MimeType:          inf.Header.Get("Content-Type"),
 		OriginalName:      inf.Filename,
 		Size:              inf.Size,
-		StoragePath:       up,
+		StoragePath:       sp,
 		UploadedExtension: tExt,
 	}
 
@@ -89,7 +89,7 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Log the file upload
 	h.log.Info().Str("file_id", id).
 		Str("file_name", inf.Filename).
-		Str("stored_path", up).
+		Str("stored_path", sp).
 		Msg("File uploaded successfully")
 
 	// Enqueue the file for processing
@@ -115,8 +115,8 @@ func (h handler) ResizeImage(f *models.File, log zerolog.Logger) error {
 	// This will be handled by the async worker
 	// and will be processed in the background
 	payload := &tasks.ImageResizePayload{
-		Width:        800,
-		Height:       600,
+		Width:        200,
+		Height:       400,
 		FileID:       f.ID,
 		StoragePath:  f.StoragePath,
 		OriginalName: f.OriginalName,

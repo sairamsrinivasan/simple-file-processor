@@ -14,7 +14,7 @@ type File struct {
 	ID                string            `gorm:"type:uuid;default:gen_random_uuid();primary_key"`
 	GeneratedName     string            `json:"generated_name"`                      // e.g. file name without extension
 	MimeType          string            `json:"mime_type"`                           // e.g. file mime type
-	ProcessedOutput   []ProcessedOutput `json:"processed_outputs" gorm:"type:jsonb"` // e.g. processed outputs of the file, storing as jsonb
+	ProcessedOutputs  []ProcessedOutput `json:"processed_outputs" gorm:"type:jsonb"` // e.g. processed outputs of the file, storing as jsonb
 	OriginalName      string            `json:"original_name"`                       // e.g. file name with extension
 	Size              int64             `json:"size"`                                // e.g. file size in bytes
 	Status            string            `json:"status" gorm:"default:'pending'"`     // e.g. pending, processing, completed, failed

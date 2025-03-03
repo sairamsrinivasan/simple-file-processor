@@ -21,6 +21,111 @@ func (_m *Database) EXPECT() *Database_Expecter {
 	return &Database_Expecter{mock: &_m.Mock}
 }
 
+// AddProcessedOutput provides a mock function with given fields: _a0, _a1
+func (_m *Database) AddProcessedOutput(_a0 string, _a1 models.ProcessedOutput) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AddProcessedOutput")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, models.ProcessedOutput) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Database_AddProcessedOutput_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddProcessedOutput'
+type Database_AddProcessedOutput_Call struct {
+	*mock.Call
+}
+
+// AddProcessedOutput is a helper method to define mock.On call
+//   - _a0 string
+//   - _a1 models.ProcessedOutput
+func (_e *Database_Expecter) AddProcessedOutput(_a0 interface{}, _a1 interface{}) *Database_AddProcessedOutput_Call {
+	return &Database_AddProcessedOutput_Call{Call: _e.mock.On("AddProcessedOutput", _a0, _a1)}
+}
+
+func (_c *Database_AddProcessedOutput_Call) Run(run func(_a0 string, _a1 models.ProcessedOutput)) *Database_AddProcessedOutput_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(models.ProcessedOutput))
+	})
+	return _c
+}
+
+func (_c *Database_AddProcessedOutput_Call) Return(_a0 error) *Database_AddProcessedOutput_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Database_AddProcessedOutput_Call) RunAndReturn(run func(string, models.ProcessedOutput) error) *Database_AddProcessedOutput_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// FileByID provides a mock function with given fields: _a0
+func (_m *Database) FileByID(_a0 string) (*models.File, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FileByID")
+	}
+
+	var r0 *models.File
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*models.File, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(string) *models.File); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.File)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Database_FileByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FileByID'
+type Database_FileByID_Call struct {
+	*mock.Call
+}
+
+// FileByID is a helper method to define mock.On call
+//   - _a0 string
+func (_e *Database_Expecter) FileByID(_a0 interface{}) *Database_FileByID_Call {
+	return &Database_FileByID_Call{Call: _e.mock.On("FileByID", _a0)}
+}
+
+func (_c *Database_FileByID_Call) Run(run func(_a0 string)) *Database_FileByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *Database_FileByID_Call) Return(_a0 *models.File, _a1 error) *Database_FileByID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *Database_FileByID_Call) RunAndReturn(run func(string) (*models.File, error)) *Database_FileByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // InsertFileMetadata provides a mock function with given fields: _a0
 func (_m *Database) InsertFileMetadata(_a0 *models.File) error {
 	ret := _m.Called(_a0)
