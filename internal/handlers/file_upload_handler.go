@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"simple-file-processor/internal/models"
-	"simple-file-processor/internal/tasks"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -98,51 +97,6 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		Str("stored_path", sp).
 		Msg("File uploaded successfully")
 
-	// Enqueue the file for processing
-	h.ProcessFile(file, h.log)
-}
-
-func (h handler) ProcessFile(f *models.File, log zerolog.Logger) {
-	// Enqueue the file for processing
-	// This will be handled by the async worker
-	// and will be processed in the background
-	if f.IsImage() {
-		err := h.ResizeImage(f, log)
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to enqueue image resize task")
-		}
-	}
-}
-
-// A function that enqueues an image resize task
-// This will be handled by the async worker
-func (h handler) ResizeImage(f *models.File, log zerolog.Logger) error {
-	// Enqueue the image resize task
-	// This will be handled by the async worker
-	// and will be processed in the background
-	payload := &tasks.ImageResizePayload{
-		Width:        200,
-		Height:       400,
-		FileID:       f.ID,
-		StoragePath:  f.StoragePath,
-		OriginalName: f.OriginalName,
-	}
-
-	t, err := tasks.NewImageResizeTask(h.ac, log, payload)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to create image resize task")
-		return err
-	}
-
-	// Enqueue the image resize task
-	if err := t.Enqueue(); err != nil {
-		log.Error().Err(err).Msg("Failed to enqueue image resize task")
-		return err
-	}
-
-	// Log the image resize task
-	log.Info().Str("file_id", f.ID).Msg("Image resize task enqueued")
-	return nil
 }
 
 func Success(w http.ResponseWriter, f *models.File) {

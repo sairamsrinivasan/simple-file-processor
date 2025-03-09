@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"simple-file-processor/internal/db"
 	"simple-file-processor/internal/tasks"
@@ -34,6 +35,7 @@ func NewHandlers(log zerolog.Logger, db db.Database, ac tasks.Client) Handlers {
 	h.Handlers = make(map[string]func(w http.ResponseWriter, r *http.Request))
 	h.Handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
 	h.Handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)
+	h.Handlers["FileResizeHandler"] = http.HandlerFunc(h.FileResizeHandler)
 	return h
 }
 
@@ -45,4 +47,11 @@ func (h handler) GetHandler(name string) func(w http.ResponseWriter, r *http.Req
 	}
 
 	return nil
+}
+
+// parseRequest parses the request body into the given struct
+func (h handler) parseRequest(r *http.Request, v interface{}) error {
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	return decoder.Decode(v)
 }

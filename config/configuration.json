@@ -11,9 +11,14 @@
             "method": "GET"
         },
         {
-            "path": "/upload",
+            "path": "/file/upload",
             "handler": "FileUploadHandler",
             "method": "POST"
+        },
+        {
+            "path": "/file/:id/resize",
+            "handler": "FileResizeHandler",
+            "method": "PUT"
         }
     ],
     "database": {
