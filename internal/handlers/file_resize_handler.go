@@ -66,19 +66,19 @@ func (h handler) FileResizeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ResizeImage enqueues the image resize task to be processed by the async worker
-func (h handler) ResizeImage(f *models.File, req fileResizeRequest, log zerolog.Logger) error {
+func (h handler) ResizeImage(f *models.File, req fileResizeRequest, log *zerolog.Logger) error {
 	// Enqueue the image resize task
 	// This will be handled by the async worker
 	// and will be processed in the background
 	payload := &tasks.ImageResizePayload{
-		Width:        req.Width,
-		Height:       req.Height,
-		FileID:       f.ID,
-		StoragePath:  f.StoragePath,
-		OriginalName: f.OriginalName,
+		Width:       req.Width,
+		Height:      req.Height,
+		FileID:      f.ID,
+		StoragePath: f.StoragePath,
+		Filename:    f.GeneratedName, // The name of the file in the storage path
 	}
 
-	t, err := tasks.NewImageResizeTask(h.ac, log, payload)
+	t, err := tasks.NewImageResizeTask(h.ac, payload, log)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create image resize task")
 		return err

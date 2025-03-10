@@ -56,7 +56,7 @@ func Test_FileUploadHandler_WhenFileTooLarge_Expect413(t *testing.T) {
 	req.Header.Set("Content-Type", "multipart/form-data")
 	req.ContentLength = 1000000000   // 1GB
 	req.ParseMultipartForm(10 << 20) // 10MB limit
-	h := NewHandlers(log, db, ac)
+	h := NewHandlers(&log, db, ac)
 	h.GetHandler(hKey)(rec, req)
 	assert.Equal(t, rec.Code, 413)
 	os.RemoveAll("uploads") // clean up
@@ -69,7 +69,7 @@ func Test_FileUploadHandler_WhenFieldNameIncorrect_Expect400(t *testing.T) {
 	db := new(mockdb.Database)
 	ac := new(mocktasks.Client)
 	req := MultiPartFormRequest(t, fn)
-	hand := NewHandlers(log, db, ac)
+	hand := NewHandlers(&log, db, ac)
 	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, 400)
 	os.RemoveAll("uploads") // clean up
@@ -82,7 +82,7 @@ func Test_FileUploadHandler_WhenFileUploaded_WhenErrorSavingMetadata_Expect500(t
 	ac := new(mocktasks.Client)
 	fn := "file"
 	req := MultiPartFormRequest(t, fn)
-	hand := NewHandlers(log, db, ac)
+	hand := NewHandlers(&log, db, ac)
 	db.On("InsertFileMetadata", mock.Anything).Return(errors.New("error saving metadata"))
 	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, 500)

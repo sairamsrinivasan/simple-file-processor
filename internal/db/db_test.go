@@ -18,14 +18,14 @@ var (
 func Test_NewDB_WhenCalled_ReturnsDB(t *testing.T) {
 	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
-	gdb := NewDB(db, l)
+	gdb := NewDB(db, &l)
 	g.Expect(gdb).NotTo(gomega.BeNil())
 }
 
 func Test_Migrate_WhenCalled_ReturnsNil(t *testing.T) {
 	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
-	gdb := NewDB(db, l)
+	gdb := NewDB(db, &l)
 	db.On("AutoMigrate", &models.File{}).Return(nil)
 	err := gdb.Migrate()
 	g.Expect(err).To(gomega.BeNil())
@@ -34,7 +34,7 @@ func Test_Migrate_WhenCalled_ReturnsNil(t *testing.T) {
 func Test_Migrate_WhenErrorAutoMigrate_ReturnsError(t *testing.T) {
 	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
-	gdb := NewDB(db, l)
+	gdb := NewDB(db, &l)
 	db.On("AutoMigrate", &models.File{}).Return(errors.New("error"))
 	err := gdb.Migrate()
 	g.Expect(err).NotTo(gomega.BeNil())
@@ -43,7 +43,7 @@ func Test_Migrate_WhenErrorAutoMigrate_ReturnsError(t *testing.T) {
 func Test_InsertFileMetadata_WhenNoError_ReturnsNil(t *testing.T) {
 	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
-	gdb := NewDB(db, l)
+	gdb := NewDB(db, &l)
 	file := &models.File{
 		OriginalName: "test.txt",
 	}
@@ -56,7 +56,7 @@ func Test_InsertFileMetadata_WhenNoError_ReturnsNil(t *testing.T) {
 func Test_InsertFileMetadata_WhenError_ReturnsError(t *testing.T) {
 	db := new(mockdb.GormDB)
 	g := gomega.NewWithT(t)
-	gdb := NewDB(db, l)
+	gdb := NewDB(db, &l)
 	file := &models.File{
 		OriginalName: "test.txt",
 	}

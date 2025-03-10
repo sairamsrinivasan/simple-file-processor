@@ -7,9 +7,11 @@ import (
 	"image"
 	"image/jpeg"
 	"os"
+	"path/filepath"
 	"simple-file-processor/internal/db"
 	"simple-file-processor/internal/models"
 
+	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
 	"github.com/nfnt/resize"
 	"github.com/rs/zerolog"
@@ -21,20 +23,20 @@ const (
 
 // Holds the payload for the image resize task
 type ImageResizePayload struct {
-	Width        int
-	Height       int
-	FileID       string
-	StoragePath  string
-	OriginalName string
+	Width       int
+	Height      int
+	FileID      string
+	StoragePath string
+	Filename    string
 }
 
 type imageResizeHandler struct {
 	db  db.Database
-	log zerolog.Logger
+	log *zerolog.Logger
 }
 
 // Constructs a client for the image resize task
-func NewImageResizeTask(c Client, l zerolog.Logger, p *ImageResizePayload) (Task, error) {
+func NewImageResizeTask(c Client, p *ImageResizePayload, l *zerolog.Logger) (Task, error) {
 	payload, err := json.Marshal(p)
 	if err != nil {
 		l.Error().Err(err).Msg("Failed to marshal image resize task payload for file: " + p.FileID)
@@ -52,7 +54,7 @@ func NewImageResizeTask(c Client, l zerolog.Logger, p *ImageResizePayload) (Task
 // Constructs a new image resize handler for the async worker
 // This will handle the image resize task and ensures that the
 // handler has access to the logger
-func NewImageResizeHandler(db db.Database, l zerolog.Logger) *imageResizeHandler {
+func NewImageResizeHandler(db db.Database, l *zerolog.Logger) *imageResizeHandler {
 	return &imageResizeHandler{
 		db:  db,
 		log: l,
@@ -71,7 +73,7 @@ func (i *imageResizeHandler) ProcessTask(ctx context.Context, t *asynq.Task) err
 
 	i.log.Info().Msg("Resizing image for file with payload: " + string(t.Payload()))
 
-	po, err := resizeImage(p.StoragePath, p.OriginalName, p.Width, p.Height, i.log)
+	po, err := resizeImage(p.StoragePath, p.Filename, p.Width, p.Height, i.log)
 	if err != nil {
 		i.log.Error().Err(err).Msg("Failed to resize image for file with payload: " + string(t.Payload()))
 		return err
@@ -83,65 +85,67 @@ func (i *imageResizeHandler) ProcessTask(ctx context.Context, t *asynq.Task) err
 
 	// Insert the processed output into the database
 	if err := i.db.AddProcessedOutput(p.FileID, po); err != nil {
-		i.log.Error().Err(err).Msg(fmt.Sprintf("Failed to add processed output %s to file: %s", po.OriginalName, p.FileID))
+		i.log.Error().Err(err).Msg(fmt.Sprintf("Failed to add processed output %s to file: %s", po.Name, p.FileID))
 	}
 
-	i.log.Info().Msg(fmt.Sprintf("Added processed output %s to file: %s", po.OriginalName, p.FileID))
+	i.log.Info().Msg(fmt.Sprintf("Added processed output %s to file: %s", po.Name, p.FileID))
 	return nil
 }
 
 // Resizes the image with the given payload
-func resizeImage(sp string, on string, w, h int, l zerolog.Logger) (models.ProcessedOutput, error) {
-	in, err := buildImage(sp, on)
+func resizeImage(sp string, on string, w, h int, l *zerolog.Logger) (models.ProcessedOutput, error) {
+	// Open the image file
+	f, err := os.Open(fmt.Sprintf("%s/%s", sp, on))
+	if err != nil {
+		return models.ProcessedOutput{}, err
+	}
+	defer f.Close()
+
+	// Decode the image
+	img, err := decode(f)
 	if err != nil {
 		l.Error().Err(err).Msg(fmt.Sprintf("Failed to open image %s at storage path %s", on, sp))
 		return models.ProcessedOutput{}, err
 	}
 
 	// Resize the image
-	out := resize.Resize(uint(w), uint(h), in, resize.Lanczos3)
+	out := resize.Resize(uint(w), uint(h), img, resize.Lanczos3)
 
-	// Create the output file
-	of := fmt.Sprintf("%s/%s", sp, "resized_"+on)
-	f, err := os.Create(of)
+	// Create the output file with a unique ID
+	poid := uuid.New()
+	ofp := fmt.Sprintf("%s/%s", sp, "resized_"+poid.String()+filepath.Ext(f.Name()))
+	of, err := os.Create(ofp)
 	if err != nil {
-		l.Error().Err(err).Msg(fmt.Sprintf("Failed to create resized image %s at storage path: %s", of, sp))
+		l.Error().Err(err).Msg(fmt.Sprintf("Failed to create resized image %s at storage path: %s", ofp, sp))
+		return models.ProcessedOutput{}, err
 	}
-	defer f.Close()
+	defer of.Close()
 
 	// Encode the image to the output file
-	if err := jpeg.Encode(f, out, nil); err != nil {
-		l.Error().Err(err).Msg(fmt.Sprintf("Failed to encode resized image %s at storage path: %s", of, sp))
+	if err := jpeg.Encode(of, out, nil); err != nil {
+		l.Error().Err(err).Msg(fmt.Sprintf("Failed to encode resized image %s at storage path: %s", ofp, sp))
 		return models.ProcessedOutput{}, err
 	}
 
-	// Get the size of the output file
-	fi, err := os.Stat(of)
-
 	// Create the processed output
+	fi, _ := os.Stat(ofp)
 	po := models.ProcessedOutput{
-		StoragePath:  sp,
-		OriginalName: fi.Name(),
-		Width:        w,
-		Height:       h,
-		Type:         "image",
-		Size:         fi.Size(),
+		ID:          poid,
+		StoragePath: sp,
+		Name:        fi.Name(),
+		Width:       w,
+		Height:      h,
+		Type:        "image",
+		Size:        fi.Size(),
 	}
 
-	l.Info().Msg(fmt.Sprintf("Resized image %s at storage path: %s", of, sp))
+	l.Info().Msg(fmt.Sprintf("Resized image %s at storage path: %s", ofp, sp))
 	return po, nil
 }
 
 // obtains an image from the storage path
 // and returns the image object
-func buildImage(storagePath, originalName string) (image.Image, error) {
-	p := fmt.Sprintf("%s/%s", storagePath, originalName)
-	f, err := os.Open(p)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
+func decode(f *os.File) (image.Image, error) {
 	img, _, err := image.Decode(f)
 	if err != nil {
 		return nil, err

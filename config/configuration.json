@@ -16,7 +16,7 @@
             "method": "POST"
         },
         {
-            "path": "/file/:id/resize",
+            "path": "/file/{id}/resize",
             "handler": "FileResizeHandler",
             "method": "PUT"
         }

@@ -13,7 +13,7 @@ import (
 )
 
 type workerServer struct {
-	log   zerolog.Logger
+	log   *zerolog.Logger
 	rDB   int
 	rAddr string
 	db    db.Database
@@ -23,7 +23,7 @@ type WorkerServer interface {
 	Start()
 }
 
-func NewWorkerServer(rAddr string, rDB int, db db.Database, log zerolog.Logger) WorkerServer {
+func NewWorkerServer(rAddr string, rDB int, db db.Database, log *zerolog.Logger) WorkerServer {
 	return &workerServer{
 		log:   log,
 		rDB:   rDB,

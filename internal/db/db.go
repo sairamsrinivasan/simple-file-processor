@@ -3,13 +3,16 @@ package db
 import (
 	"fmt"
 	"simple-file-processor/internal/models"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/rs/zerolog"
 )
 
 type DB struct {
 	Gdb GormDB
-	Log zerolog.Logger
+	Log *zerolog.Logger
 }
 
 type Database interface {
@@ -21,7 +24,7 @@ type Database interface {
 
 // NewDB creates a new database instance with the given configuration and gorm instance
 // the gorm instance is passed as an interface to allow for mocking in tests
-func NewDB(gdb GormDB, l zerolog.Logger) Database {
+func NewDB(gdb GormDB, l *zerolog.Logger) Database {
 	return &DB{Gdb: gdb, Log: l} // No need to take address of an interface
 }
 
@@ -55,6 +58,17 @@ func (db DB) InsertFileMetadata(f *models.File) error {
 
 // Adds a processed output to the file
 func (db DB) AddProcessedOutput(fid string, po models.ProcessedOutput) error {
+	// Adding a processed output to a file does not create a new record in the database
+	// Instead, it updates the existing file record with the new processed output
+	// Set the ID and timestamps for the processed output
+	if po.ID == uuid.Nil {
+		db.Log.Info().Msg("Setting ID for processed output")
+		po.ID = uuid.New()
+	}
+
+	po.CreatedAt = time.Now()
+	po.UpdatedAt = time.Now()
+
 	// Add the processed output to the file
 	db.Log.Info().Msg(fmt.Sprintf("Adding processed output to file: %s", fid))
 	f, err := db.FileByID(fid)

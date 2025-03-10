@@ -15,7 +15,7 @@ type router struct {
 	conf     config.Config
 	handlers handlers.Handlers
 	router   *mux.Router
-	log      zerolog.Logger
+	log      *zerolog.Logger
 }
 
 type Router interface {
@@ -24,7 +24,7 @@ type Router interface {
 }
 
 // NewRouter initializes the router with the given configuration
-func NewRouter(c config.Config, log zerolog.Logger, db db.Database) Router {
+func NewRouter(c config.Config, log *zerolog.Logger, db db.Database) Router {
 	// Set up an async client to be used for async tasks
 	// Initialize the router with the given configuration
 	// and return the router instance

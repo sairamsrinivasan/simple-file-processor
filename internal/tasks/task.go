@@ -9,9 +9,9 @@ import (
 
 // The client that will be used to enqueue the image resize task
 type task struct {
-	client Client         // Client to interact with the task queue
-	log    zerolog.Logger // Logger to log messages
-	task   *asynq.Task    // Task to be enqueued
+	client Client          // Client to interact with the task queue
+	log    *zerolog.Logger // Logger to log messages
+	task   *asynq.Task     // Task to be enqueued
 }
 
 // ImageResizeTask interface defines the methods that the image resize task client should implement

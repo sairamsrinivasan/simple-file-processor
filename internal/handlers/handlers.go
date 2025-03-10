@@ -11,7 +11,7 @@ import (
 
 type handler struct {
 	Handlers map[string]func(w http.ResponseWriter, r *http.Request)
-	log      zerolog.Logger
+	log      *zerolog.Logger
 	db       db.Database
 	ac       tasks.Client
 }
@@ -21,7 +21,7 @@ type Handlers interface {
 }
 
 // Configures handlers for the server
-func NewHandlers(log zerolog.Logger, db db.Database, ac tasks.Client) Handlers {
+func NewHandlers(log *zerolog.Logger, db db.Database, ac tasks.Client) Handlers {
 	h := &handler{
 		log: log,
 		db:  db,

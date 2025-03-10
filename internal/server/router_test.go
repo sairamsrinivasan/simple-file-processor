@@ -13,7 +13,7 @@ import (
 
 var (
 	c config.Config
-	l zerolog.Logger
+	l *zerolog.Logger
 	d db.Database
 )
 
@@ -23,7 +23,7 @@ func TestNewRouter(t *testing.T) {
 	gdb := new(mockdb.GormDB)
 	c := config.NewConfig()
 	l := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
-	db := db.NewDB(gdb, l)
-	r := NewRouter(c, l, db)
+	db := db.NewDB(gdb, &l)
+	r := NewRouter(c, &l, db)
 	assert.NotNil(t, r)
 }

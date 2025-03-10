@@ -18,7 +18,7 @@ var (
 func TestNewHandlers(t *testing.T) {
 	db := new(mockdb.Database)
 	ac := new(mocktasks.Client)
-	h := NewHandlers(log, db, ac)
+	h := NewHandlers(&log, db, ac)
 	assert.NotNil(t, h)
 }
 
@@ -26,7 +26,7 @@ func TestNewHandlers(t *testing.T) {
 func TestGetHandler(t *testing.T) {
 	db := new(mockdb.Database)
 	ac := new(mocktasks.Client)
-	h := NewHandlers(log, db, ac)
+	h := NewHandlers(&log, db, ac)
 	assert.NotNil(t, h)
 	handler := h.GetHandler("HealthCheckHandler")
 	assert.NotNil(t, handler)
@@ -35,7 +35,7 @@ func TestGetHandler(t *testing.T) {
 func TestGetHandlerNotFound(t *testing.T) {
 	db := new(mockdb.Database)
 	ac := new(mocktasks.Client)
-	h := NewHandlers(log, db, ac)
+	h := NewHandlers(&log, db, ac)
 	assert.NotNil(t, h)
 	handler := h.GetHandler("NotFoundHandler")
 	assert.Nil(t, handler)
