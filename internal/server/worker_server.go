@@ -44,7 +44,7 @@ func (ws *workerServer) Start() {
 	mux := asynq.NewServeMux()
 
 	// Register the image resize handler with the task queue
-	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, ws.log))
+	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, tasks.NewResizer(ws.log), ws.log))
 
 	ws.log.Info().Msg("Starting worker server...")
 
