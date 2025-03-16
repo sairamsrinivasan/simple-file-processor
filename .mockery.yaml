@@ -30,3 +30,9 @@ packages:
             dir: "internal/mocks/mocktasks"
             mockname: "{{.InterfaceName}}"
             outpkg: "mocktasks"
+        Resizer:
+          config:
+            filename: "mock_resizer.go"
+            dir: "internal/mocks/mocktasks"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mocktasks"
