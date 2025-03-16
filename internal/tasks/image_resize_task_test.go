@@ -78,7 +78,7 @@ func TestNewImageResizeHandler(t *testing.T) {
 // Tests for the ProcessTask function
 func TestProcessTask(t *testing.T) {
 	log := zerolog.Nop()
-
+	task := asynq.NewTask(tasks.ImageResizeTaskType, []byte(`{"Width":100,"Height":100,"FileID":"123","StoragePath":"/path/to/file","Filename":"test.jpg"}`))
 	// test cases
 	tests := []struct {
 		name        string
@@ -89,7 +89,7 @@ func TestProcessTask(t *testing.T) {
 	}{
 		{
 			name: "valid task",
-			task: asynq.NewTask(tasks.ImageResizeTaskType, []byte(`{"Width":100,"Height":100,"FileID":"123","StoragePath":"/path/to/file","Filename":"test.jpg"}`)),
+			task: task,
 			mockDB: func(m *mockdb.Database) {
 				m.On("AddProcessedOutput", mock.Anything, mock.Anything).Return(nil)
 			},
@@ -100,12 +100,23 @@ func TestProcessTask(t *testing.T) {
 		},
 		{
 			name: "resize error",
-			task: asynq.NewTask(tasks.ImageResizeTaskType, []byte(`{"Width":0,"Height":0,"FileID":"123","StoragePath":"/path/to/file","Filename":"test.jpg"}`)),
+			task: task,
 			mockDB: func(m *mockdb.Database) {
 				// No database interaction expected
 			},
 			mockResizer: func(m *mocktasks.Resizer) {
 				m.On("ResizeImage", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(models.ProcessedOutput{}, assert.AnError)
+			},
+			expectErr: true,
+		},
+		{
+			name: "error adding processed output",
+			task: task,
+			mockDB: func(m *mockdb.Database) {
+				m.On("AddProcessedOutput", mock.Anything, mock.Anything).Return(assert.AnError)
+			},
+			mockResizer: func(m *mocktasks.Resizer) {
+				m.On("ResizeImage", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(models.ProcessedOutput{}, nil)
 			},
 			expectErr: true,
 		},

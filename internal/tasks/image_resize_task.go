@@ -77,6 +77,7 @@ func (i *imageResizeHandler) ProcessTask(ctx context.Context, t *asynq.Task) err
 	// Insert the processed output into the database
 	if err := i.db.AddProcessedOutput(p.FileID, po); err != nil {
 		i.log.Error().Err(err).Msg(fmt.Sprintf("Failed to add processed output %s to file: %s", po.Name, p.FileID))
+		return err
 	}
 
 	i.log.Info().Msg(fmt.Sprintf("Added processed output %s to file: %s", po.Name, p.FileID))
