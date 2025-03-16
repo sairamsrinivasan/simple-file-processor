@@ -29,6 +29,12 @@ func NewResizer(l *zerolog.Logger) Resizer {
 
 // Resizes the image with the given payload
 func (r *imageResizer) ResizeImage(sp string, fn string, w, h int) (models.ProcessedOutput, error) {
+	// Validate the input parameters
+	if w <= 0 || h <= 0 || fn == "" {
+		r.log.Error().Msg(fmt.Sprintf("Invalid width or height for image %s at storage path %s", fn, sp))
+		return models.ProcessedOutput{}, fmt.Errorf("invalid width or height")
+	}
+
 	// Open the image file
 	f, err := os.Open(fmt.Sprintf("%s/%s", sp, fn))
 	if err != nil {
