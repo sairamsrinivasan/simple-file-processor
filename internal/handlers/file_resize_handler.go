@@ -19,6 +19,7 @@ type fileResizeRequest struct {
 func (h handler) FileResizeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fid := vars["id"]
+	h.log.Info().Str("file_id", fid).Msg("File resize request received")
 	if vars["id"] == "" {
 		h.log.Error().Msg("File ID is required")
 		http.Error(w, `{"error": "File id is a required path parameter"}`, http.StatusUnprocessableEntity)
