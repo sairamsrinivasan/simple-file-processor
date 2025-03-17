@@ -35,3 +35,61 @@ The upload API takes form data as input, with "file" as the key and the value be
 + Response (413) - File is too large
 + Response (400) - payload does not contain the "file" key within form-data
 + Response (500) - failure creating the file on the server or inserting file metadata information into database
+
+#### PUT - /file/{id}/resize
+
+The resize endpoint allows us to resize a file. Currently, only images can be resized and the task
+is queued in Redis and carried out through a background job.
+
++ Request 
+
+The resize API takes the following payload:
+
+```
+{
+    "width: 123 // integer
+    "height": 123 // integer
+}
+```
+
++ Response (202)
+
+```
+{
+    message: "Image resize task enqueued"
+}
+```
+
++ Response (400) - 
+```
+{
+    error: "Failed to parse request"
+}
+```
+
++ Response (404) - File is not found
+```
+{
+    error: "File not found"
+}
+```
+
++ Response (422) - This response is returned for invalid requests and there are many cases where requests may be invalid. The respone structure coveys a message such that it is clear as to what is incorrect about the request.
+
+```
+{
+    error: "Failed to enqueue resize task"
+}
+```
+
+```
+{
+    error: "File is not an image"
+}
+```
+
+```
+{
+    error: "File id is a required path parameter"
+}
+```

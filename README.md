@@ -5,6 +5,7 @@ This is a go based file upload service with asynchronous processing and database
 ## Features
 
 - File upload with unique naming to avoid collisions
+- Image resizing through background jobs
 - Image Type Detection based on file name and extension
 - PostgreSQL Metadata Storage using GORM
 - Structured Logging with Zerolog
@@ -39,6 +40,14 @@ This project uses PostgreSQL to store file metadata information. Database creden
 | DB_HOST | This is the database host, if running locally, this will be "localhost" |
 | DB_PORT | The port used to establish the database connection, by default it is configured to be 5432 |
 | DB_NAME | The name of the database which will hold all tables related to the storing metadata information about the file. The database name by default is "file_processor" |
+
+### Redis Setup
+
+This project uses Redis as a message broker to hold background job information. Background jobs are created as tasks and utilize the asynq library. Upon application startup, a background job server is launched in a separate thread.
+
+- Asnyq: https://github.com/hibiken/asynq
+
+Please install redis through your package manager and launch redis in the background. The default configuration for the redis server is defined within configuration.json
 
 ### Makefile Targets
 
