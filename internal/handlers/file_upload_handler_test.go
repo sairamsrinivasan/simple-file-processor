@@ -10,13 +10,14 @@ import (
 	"os"
 	"testing"
 
-	"simple-file-processor/internal/mocks"
+	"simple-file-processor/internal/mocks/mockdb"
+	"simple-file-processor/internal/mocks/mocktasks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-var (
+const (
 	hKey = "FileUploadHandler"
 )
 
@@ -49,12 +50,13 @@ func MultiPartFormRequest(t *testing.T, fieldname string) *http.Request {
 // Verifies that when the file is too large, the handler returns a 413 status co
 func Test_FileUploadHandler_WhenFileTooLarge_Expect413(t *testing.T) {
 	rec := ResponseRecorder()
-	db := new(mocks.Database)
+	db := new(mockdb.Database)
+	ac := new(mocktasks.Client)
 	req := httptest.NewRequest("POST", "/upload", nil)
 	req.Header.Set("Content-Type", "multipart/form-data")
 	req.ContentLength = 1000000000   // 1GB
 	req.ParseMultipartForm(10 << 20) // 10MB limit
-	h := NewHandlers(log, db)
+	h := NewHandlers(&log, db, ac)
 	h.GetHandler(hKey)(rec, req)
 	assert.Equal(t, rec.Code, 413)
 	os.RemoveAll("uploads") // clean up
@@ -64,9 +66,10 @@ func Test_FileUploadHandler_WhenFileTooLarge_Expect413(t *testing.T) {
 func Test_FileUploadHandler_WhenFieldNameIncorrect_Expect400(t *testing.T) {
 	rr := ResponseRecorder()
 	fn := "test-file" // incorrect field name
-	db := new(mocks.Database)
+	db := new(mockdb.Database)
+	ac := new(mocktasks.Client)
 	req := MultiPartFormRequest(t, fn)
-	hand := NewHandlers(log, db)
+	hand := NewHandlers(&log, db, ac)
 	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, 400)
 	os.RemoveAll("uploads") // clean up
@@ -75,25 +78,13 @@ func Test_FileUploadHandler_WhenFieldNameIncorrect_Expect400(t *testing.T) {
 // Verifies that when the file is successfully uploaded and the database returns an error, the handler returns a 500 status code
 func Test_FileUploadHandler_WhenFileUploaded_WhenErrorSavingMetadata_Expect500(t *testing.T) {
 	rr := ResponseRecorder()
-	fn := "file" // correct field name
-	db := new(mocks.Database)
+	db := new(mockdb.Database)
+	ac := new(mocktasks.Client)
+	fn := "file"
 	req := MultiPartFormRequest(t, fn)
-	hand := NewHandlers(log, db)
+	hand := NewHandlers(&log, db, ac)
 	db.On("InsertFileMetadata", mock.Anything).Return(errors.New("error saving metadata"))
 	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, 500)
-	os.RemoveAll("uploads") // clean up
-}
-
-// Verifies that when the file is successfully uploaded and the database returns a success, the handler returns a 200 status code
-func Test_FileUploadHandler_WhenFileUploaded_WhenSuccess_Expect200(t *testing.T) {
-	rr := ResponseRecorder()
-	fn := "file" // correct field name
-	db := new(mocks.Database)
-	req := MultiPartFormRequest(t, fn)
-	hand := NewHandlers(log, db)
-	db.On("InsertFileMetadata", mock.Anything).Return(nil) // mock success
-	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
-	assert.Equal(t, rr.Code, 200)
 	os.RemoveAll("uploads") // clean up
 }

@@ -11,9 +11,14 @@
             "method": "GET"
         },
         {
-            "path": "/upload",
+            "path": "/file/upload",
             "handler": "FileUploadHandler",
             "method": "POST"
+        },
+        {
+            "path": "/file/{id}/resize",
+            "handler": "FileResizeHandler",
+            "method": "PUT"
         }
     ],
     "database": {
@@ -23,5 +28,10 @@
         "username": "username",
         "password": "password",
         "name": "file_processor"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "db": 0
     }
 }

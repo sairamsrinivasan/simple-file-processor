@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -48,8 +49,13 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		tExt = "unknown" // if no extension is provided
 	}
 
-	gn := filepath.Join(id, inf.Filename)
-	up := filepath.Join(uploadBase, gn)
+	gn := id + "_" + inf.Filename                          // construct unique name for the file to be stored on the file system
+	up := filepath.Join(uploadBase, filepath.Join(id, gn)) // construct unique path for the file to be stored on the file system
+	sp := filepath.Join(uploadBase, id)
+	mt := mime.TypeByExtension(ext)
+	if mt == "" {
+		mt = "application/octet-stream" // default mime type
+	}
 
 	// Create the upload directory for the file
 	if err := os.MkdirAll(filepath.Join(uploadBase, id), os.ModePerm); err != nil {
@@ -65,31 +71,32 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Track upload info for database
-	file := models.File{
+	file := &models.File{
 		ID:                id,
 		GeneratedName:     gn,
-		MimeType:          inf.Header.Get("Content-Type"),
+		MimeType:          mt,
 		OriginalName:      inf.Filename,
 		Size:              inf.Size,
-		StoragePath:       up,
+		StoragePath:       sp,
 		UploadedExtension: tExt,
 	}
 
 	// Insert the file metadata info into the database
-	if err := h.db.InsertFileMetadata(&file); err != nil {
+	if err := h.db.InsertFileMetadata(file); err != nil {
 		h.log.Error().Err(err).Msg("Failed to insert file content into the database")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	// Return success response
-	Success(w, &file)
+	Success(w, file)
 
 	// Log the file upload
 	h.log.Info().Str("file_id", id).
 		Str("file_name", inf.Filename).
-		Str("stored_path", up).
+		Str("stored_path", sp).
 		Msg("File uploaded successfully")
+
 }
 
 func Success(w http.ResponseWriter, f *models.File) {
@@ -99,7 +106,7 @@ func Success(w http.ResponseWriter, f *models.File) {
 	w.Write(resp)
 }
 
-func CreateFile(path string, f io.Reader, log zerolog.Logger) error {
+func CreateFile(path string, f io.Reader, log *zerolog.Logger) error {
 	// Create the file on the "server" (file system)
 	dst, err := os.Create(path)
 	if err != nil {
