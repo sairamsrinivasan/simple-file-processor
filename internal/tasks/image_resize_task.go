@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"simple-file-processor/internal/db"
+	"simple-file-processor/internal/lib"
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
@@ -25,7 +26,7 @@ type ImageResizePayload struct {
 
 type imageResizeHandler struct {
 	db      db.Database
-	resizer Resizer
+	resizer lib.Resizer
 	log     *zerolog.Logger
 }
 
@@ -48,7 +49,7 @@ func NewImageResizeTask(c Client, p *ImageResizePayload, l *zerolog.Logger) (Tas
 // Constructs a new image resize handler for the async worker
 // This will handle the image resize task and ensures that the
 // handler has access to the logger
-func NewImageResizeHandler(db db.Database, resizer Resizer, l *zerolog.Logger) *imageResizeHandler {
+func NewImageResizeHandler(db db.Database, resizer lib.Resizer, l *zerolog.Logger) *imageResizeHandler {
 	return &imageResizeHandler{
 		db:      db,
 		log:     l,

@@ -24,6 +24,12 @@ packages:
             dir: "internal/mocks/mocklib"
             mockname: "{{.InterfaceName}}"
             outpkg: "mocklib"
+        MetadataExtractor:
+          config:
+            filename: "mock_metadata_extractor.go"
+            dir: "internal/mocks/mocklib"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mocklib"
     simple-file-processor/internal/tasks:
       config:
       interfaces:
