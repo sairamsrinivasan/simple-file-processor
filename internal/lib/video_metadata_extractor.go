@@ -1,12 +1,8 @@
-package tasks
+package lib
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"os/exec"
-	"simple-file-processor/internal/db"
-	"simple-file-processor/internal/models"
 	"strconv"
 	"strings"
 
@@ -14,20 +10,20 @@ import (
 )
 
 type videoMetadataExtractor struct {
-	db  db.Database
-	log *zerolog.Logger
+	exec CommandExecutor
+	log  *zerolog.Logger
 }
 
 // Extractor interface defines the methods that the metadata extractor should implement
 type MetadataExtractor interface {
-	ExtractVideoMetadata(f *models.File) (*VideoMetadata, error)
+	ExtractVideoMetadata(path string) (*VideoMetadata, error)
 }
 
 // NewMetadataExtractor constructs a new metadata extractor
-func NewMetadataExtractor(db db.Database, l *zerolog.Logger) MetadataExtractor {
+func NewMetadataExtractor(exec CommandExecutor, l *zerolog.Logger) MetadataExtractor {
 	return &videoMetadataExtractor{
-		db:  db,
-		log: l,
+		log:  l,
+		exec: exec,
 	}
 }
 
@@ -64,37 +60,25 @@ type ffprobeOutput struct {
 }
 
 // ExtractMetadata extracts metadata from the file
-func (e *videoMetadataExtractor) ExtractVideoMetadata(f *models.File) (*VideoMetadata, error) {
-	// Extract metadata from file
-	// This is a placeholder for the actual metadata extraction logic
-	// You can use a library like ffmpeg or exiftool to extract metadata from the file
-	// For now, we'll just log the file ID and return nil
-	e.log.Info().Str("file_id", f.ID).Msg("Extracting metadata from video file " + f.OriginalName)
-
-	sp := f.StoragePath
-
+func (e *videoMetadataExtractor) ExtractVideoMetadata(path string) (*VideoMetadata, error) {
 	// Shell out to ffprobe to get the metadata
 	// ffprobe -v error -print_format json -show_format -show_streams <file>
-	cmd := exec.Command(
+	out, err := e.exec.Command(
 		"ffprobe",
 		"-v", "error",
 		"-print_format", "json",
 		"-show_format",
 		"-show_streams",
-		fmt.Sprintf("%s/%s", sp, f.GeneratedName),
+		path,
 	)
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-	if err := cmd.Run(); err != nil {
-		e.log.Error().Err(err).Msg("Failed to run ffprobe command for file " + f.OriginalName)
+	if err != nil {
+		e.log.Error().Err(err).Msg("Failed to execute ffprobe for file " + path)
 		return nil, err
 	}
 
 	var po ffprobeOutput
-	if err := json.Unmarshal(out.Bytes(), &po); err != nil {
-		e.log.Error().Err(err).Msg("Failed to unmarshal ffprobe output for file " + f.OriginalName)
+	if err := json.Unmarshal(out, &po); err != nil {
+		e.log.Error().Err(err).Msg("Failed to unmarshal ffprobe output for file " + path)
 		return nil, err
 	}
 

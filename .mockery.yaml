@@ -15,6 +15,15 @@ packages:
             dir: "internal/mocks/mockdb"
             mockname: "{{.InterfaceName}}"
             outpkg: "mockdb"
+    simple-file-processor/internal/lib:
+      config:
+      interfaces:
+        CommandExecutor:
+          config:
+            filename: "mock_command_executor.go"
+            dir: "internal/mocks/mocklib"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mocklib"
     simple-file-processor/internal/tasks:
       config:
       interfaces:

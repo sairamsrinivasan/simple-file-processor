@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"simple-file-processor/internal/db"
+	"simple-file-processor/internal/lib"
 	"simple-file-processor/internal/models"
 
 	"github.com/hibiken/asynq"
@@ -25,7 +26,7 @@ type VideoMetadataTaskPayload struct {
 // Constructs a client for the video metadata task
 type videoMetadataHandler struct {
 	db  db.Database
-	ext MetadataExtractor
+	ext lib.MetadataExtractor
 	log *zerolog.Logger
 }
 
@@ -45,7 +46,7 @@ func NewVideoMetadataTask(c Client, p *VideoMetadataTaskPayload, l *zerolog.Logg
 	}, nil
 }
 
-func NewVideoMetadataHandler(ext MetadataExtractor, db db.Database, l *zerolog.Logger) *videoMetadataHandler {
+func NewVideoMetadataHandler(ext lib.MetadataExtractor, db db.Database, l *zerolog.Logger) *videoMetadataHandler {
 	return &videoMetadataHandler{
 		db:  db,
 		ext: ext,
@@ -79,7 +80,9 @@ func (h *videoMetadataHandler) ProcessTask(ctx context.Context, t *asynq.Task) e
 	}
 
 	// Extract the video metadata
-	m, err := h.ext.ExtractVideoMetadata(f)
+	h.log.Info().Msgf("Extracting video metadata for file %s at path %s", p.FileID, f.StoragePath)
+	path := fmt.Sprintf("%s/%s", p.StoragePath, p.Filename)
+	m, err := h.ext.ExtractVideoMetadata(path)
 	if err != nil {
 		h.log.Error().Err(err).Msg("Failed to extract video metadata")
 		return err
@@ -96,7 +99,7 @@ func (h *videoMetadataHandler) ProcessTask(ctx context.Context, t *asynq.Task) e
 	return nil
 }
 
-func processedOutput(vm *VideoMetadata) models.ProcessedOutput {
+func processedOutput(vm *lib.VideoMetadata) models.ProcessedOutput {
 	return models.ProcessedOutput{
 		BitRate:    vm.BitRate,
 		Codec:      vm.Codec,
