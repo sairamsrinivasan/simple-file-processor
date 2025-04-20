@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"simple-file-processor/internal/models"
+	"simple-file-processor/internal/tasks"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -91,12 +92,44 @@ func (h handler) FileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Return success response
 	Success(w, file)
 
+	// Generate metadata for the file
+	generateVideoMetadata(h, file)
+
 	// Log the file upload
 	h.log.Info().Str("file_id", id).
 		Str("file_name", inf.Filename).
 		Str("stored_path", sp).
 		Msg("File uploaded successfully")
 
+}
+
+func generateVideoMetadata(h handler, f *models.File) {
+	if !f.IsVideo() {
+		return
+	}
+
+	// Create a task to generate metadata for the file
+	p := &tasks.VideoMetadataTaskPayload{
+		FileID:      f.ID,
+		StoragePath: f.StoragePath,
+		Filename:    f.GeneratedName,
+	}
+
+	// Create a new video metadata task
+	task, err := tasks.NewVideoMetadataTask(h.ac, p, h.log)
+	if err != nil {
+		h.log.Error().Err(err).Msg("Failed to create video metadata task")
+		return
+	}
+
+	// Enqueue the task
+	err = task.Enqueue()
+	if err != nil {
+		h.log.Error().Err(err).Msg("Failed to enqueue video metadata task")
+		return
+	}
+
+	h.log.Info().Msg("Video metadata task enqueued successfully for file: " + f.ID)
 }
 
 func Success(w http.ResponseWriter, f *models.File) {
