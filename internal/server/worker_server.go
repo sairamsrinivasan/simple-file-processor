@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"simple-file-processor/internal/db"
+	"simple-file-processor/internal/lib"
 	"simple-file-processor/internal/tasks"
 	"syscall"
 
@@ -44,7 +45,7 @@ func (ws *workerServer) Start() {
 	mux := asynq.NewServeMux()
 
 	// Register the image resize handler with the task queue
-	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, tasks.NewResizer(ws.log), ws.log))
+	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, lib.NewResizer(ws.log), ws.log))
 
 	ws.log.Info().Msg("Starting worker server...")
 
