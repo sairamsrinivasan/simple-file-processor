@@ -37,6 +37,9 @@ func NewWorkerServer(rAddr string, rDB int, db db.Database, log *zerolog.Logger)
 // The worker server is responsible for consuming from the task queue
 // and delegating the tasks to the appropriate handlers
 func (ws *workerServer) Start() {
+	// Create a command executor for executing commands
+	cmdexec := lib.NewCommandExecutor(ws.log)
+
 	// Initialize the worker server with the given redis address and database
 	srv := asynq.NewServer(asynq.RedisClientOpt{Addr: ws.rAddr, DB: ws.rDB}, asynq.Config{
 		Concurrency: 10, // Set the concurrency level
@@ -46,6 +49,9 @@ func (ws *workerServer) Start() {
 
 	// Register the image resize handler with the task queue
 	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, lib.NewResizer(ws.log), ws.log))
+
+	// Register the video metadata handler with the task queue
+	mux.Handle(tasks.VideoMetadataTaskType, tasks.NewVideoMetadataHandler(lib.NewMetadataExtractor(cmdexec, ws.log), ws.db, ws.log))
 
 	ws.log.Info().Msg("Starting worker server...")
 
