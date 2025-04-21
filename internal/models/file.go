@@ -8,7 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var imageTypes = []string{"image/jpeg", "image/png", "image/gif", "image/jpg"} // Supported image types
+var (
+	imageTypes = []string{"image/jpeg", "image/png", "image/gif", "image/jpg"} // Supported image types
+	videoTypes = []string{"video/mp4", "video/avi", "video/mkv", "video/mov"}  // Supported video types
+)
 
 type File struct {
 	ID                string            `gorm:"type:uuid;default:gen_random_uuid();primary_key"`
@@ -31,6 +34,8 @@ func (f *File) BeforeCreate(tx *gorm.DB) (err error) {
 	if f.Type == "" {
 		if slices.Contains(imageTypes, f.MimeType) {
 			f.Type = "image"
+		} else if slices.Contains(videoTypes, f.MimeType) {
+			f.Type = "video"
 		} else {
 			f.Type = "other"
 		}
@@ -43,4 +48,10 @@ func (f *File) IsImage() bool {
 	// Check if the file extension is valid
 	ext := strings.ToLower(f.UploadedExtension)
 	return ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif"
+}
+
+func (f *File) IsVideo() bool {
+	// Check if the file extension is valid
+	ext := strings.ToLower(f.UploadedExtension)
+	return ext == "mp4" || ext == "avi" || ext == "mkv" || ext == "mov"
 }

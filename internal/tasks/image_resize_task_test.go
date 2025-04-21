@@ -3,6 +3,7 @@ package tasks_test
 import (
 	"context"
 	"simple-file-processor/internal/db"
+	"simple-file-processor/internal/lib"
 	"simple-file-processor/internal/mocks/mockdb"
 	"simple-file-processor/internal/mocks/mocktasks"
 	"simple-file-processor/internal/models"
@@ -56,7 +57,7 @@ func TestNewImageResizeHandler(t *testing.T) {
 	tests := []struct {
 		name    string
 		db      db.Database
-		resizer tasks.Resizer
+		resizer lib.Resizer
 		log     *zerolog.Logger
 	}{
 		{

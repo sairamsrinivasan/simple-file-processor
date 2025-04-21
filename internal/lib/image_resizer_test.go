@@ -1,10 +1,10 @@
-package tasks_test
+package lib_test
 
 import (
 	"image"
 	"image/jpeg"
 	"os"
-	"simple-file-processor/internal/tasks"
+	"simple-file-processor/internal/lib"
 	"testing"
 
 	"github.com/rs/zerolog"
@@ -72,7 +72,7 @@ func TestResizeImage(t *testing.T) {
 			}
 
 			// Create a new image resizer
-			resizer := tasks.NewResizer(&logger)
+			resizer := lib.NewResizer(&logger)
 			// Call the ResizeImage method
 			output, err := resizer.ResizeImage(dir, tt.fn, tt.w, tt.h)
 			if (tt.expectErr && err == nil) || (!tt.expectErr && err != nil) {

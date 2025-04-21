@@ -13,12 +13,15 @@ import (
 	"simple-file-processor/internal/mocks/mockdb"
 	"simple-file-processor/internal/mocks/mocktasks"
 
+	"github.com/hibiken/asynq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 const (
-	hKey = "FileUploadHandler"
+	hKey          = "FileUploadHandler"
+	testTxtFile   = "test.txt"
+	testVideoFile = "test.mp4"
 )
 
 func ResponseRecorder() *httptest.ResponseRecorder {
@@ -26,13 +29,13 @@ func ResponseRecorder() *httptest.ResponseRecorder {
 	return rec
 }
 
-func MultiPartFormRequest(t *testing.T, fieldname string) *http.Request {
+func MultiPartFormRequest(t *testing.T, fieldname string, filename string) *http.Request {
 	// Create a multipart form file
 	body := new(bytes.Buffer)
 	w := multipart.NewWriter(body)
 
 	// Create a file in the multipart form
-	f, err := w.CreateFormFile(fieldname, "test.txt")
+	f, err := w.CreateFormFile(fieldname, filename)
 	if err != nil {
 		t.Fatal(err)
 		return nil
@@ -68,7 +71,7 @@ func Test_FileUploadHandler_WhenFieldNameIncorrect_Expect400(t *testing.T) {
 	fn := "test-file" // incorrect field name
 	db := new(mockdb.Database)
 	ac := new(mocktasks.Client)
-	req := MultiPartFormRequest(t, fn)
+	req := MultiPartFormRequest(t, fn, testTxtFile)
 	hand := NewHandlers(&log, db, ac)
 	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, 400)
@@ -81,10 +84,28 @@ func Test_FileUploadHandler_WhenFileUploaded_WhenErrorSavingMetadata_Expect500(t
 	db := new(mockdb.Database)
 	ac := new(mocktasks.Client)
 	fn := "file"
-	req := MultiPartFormRequest(t, fn)
+	req := MultiPartFormRequest(t, fn, testTxtFile)
 	hand := NewHandlers(&log, db, ac)
 	db.On("InsertFileMetadata", mock.Anything).Return(errors.New("error saving metadata"))
 	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, 500)
+	os.RemoveAll("uploads") // clean up
+}
+
+// Verifies that the file upload handler correctly enqueues a video metadata task when a video file is uploaded
+func Test_FileUploadHandler_WhenSuccessfulVideoUpload_ExpectVideoMetadataTaskEnqueued(t *testing.T) {
+	rr := ResponseRecorder()
+	db := new(mockdb.Database)
+	ac := new(mocktasks.Client)
+	fn := "file"
+	req := MultiPartFormRequest(t, fn, testVideoFile)
+	hand := NewHandlers(&log, db, ac)
+	db.On("InsertFileMetadata", mock.Anything).Return(nil)
+	ac.On("Enqueue", mock.Anything, mock.Anything, mock.Anything).Return(&asynq.TaskInfo{
+		Payload: []byte("test"),
+	}, nil)
+	http.HandlerFunc(hand.GetHandler(hKey)).ServeHTTP(rr, req)
+
+	assert.Equal(t, rr.Code, 200)
 	os.RemoveAll("uploads") // clean up
 }
