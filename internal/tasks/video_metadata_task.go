@@ -34,11 +34,11 @@ type videoMetadataHandler struct {
 func NewVideoMetadataTask(c Client, p *VideoMetadataTaskPayload, l *zerolog.Logger) (Task, error) {
 	payload, err := json.Marshal(p)
 	if err != nil {
-		l.Error().Err(err).Msg("Failed to marshal image resize task payload for file: " + p.FileID)
+		l.Error().Err(err).Msg("Failed to marshal video metadata task payload for file: " + p.FileID)
 		return nil, err
 	}
 
-	l.Info().Msg("Creating image resize task with payload: " + string(payload))
+	l.Info().Msg("Creating video metadata task with payload: " + string(payload))
 	return &task{
 		client: c,
 		log:    l,
