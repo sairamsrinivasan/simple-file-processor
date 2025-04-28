@@ -76,7 +76,8 @@ func (r *imageResizer) ResizeImage(sp string, fn string, w, h int) (models.Proce
 		Name:        fi.Name(),
 		Width:       w,
 		Height:      h,
-		Type:        "image",
+		Type:        models.ResizedImageType,
+		Extension:   filepath.Ext(fi.Name()),
 		Size:        fi.Size(),
 	}
 

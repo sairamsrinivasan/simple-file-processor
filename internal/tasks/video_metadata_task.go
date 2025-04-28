@@ -14,6 +14,7 @@ import (
 
 const (
 	VideoMetadataTaskType = "video:extract-metadata" // Name of the task
+	metadataExt           = "json"                   // The file extension of the metadata file
 )
 
 // Holds the payload for the video metadata task
@@ -27,6 +28,7 @@ type VideoMetadataTaskPayload struct {
 type videoMetadataHandler struct {
 	db  db.Database
 	ext lib.MetadataExtractor
+	fs  lib.FileSystem
 	log *zerolog.Logger
 }
 
@@ -46,10 +48,11 @@ func NewVideoMetadataTask(c Client, p *VideoMetadataTaskPayload, l *zerolog.Logg
 	}, nil
 }
 
-func NewVideoMetadataHandler(ext lib.MetadataExtractor, db db.Database, l *zerolog.Logger) *videoMetadataHandler {
+func NewVideoMetadataHandler(ext lib.MetadataExtractor, db db.Database, fs lib.FileSystem, l *zerolog.Logger) *videoMetadataHandler {
 	return &videoMetadataHandler{
 		db:  db,
 		ext: ext,
+		fs:  fs,
 		log: l,
 	}
 }
@@ -89,25 +92,53 @@ func (h *videoMetadataHandler) ProcessTask(ctx context.Context, t *asynq.Task) e
 	}
 
 	// Create and add the processed output to the database
-	po := processedOutput(m)
+	po := processedOutput(f, m)
 	if err := h.db.AddProcessedOutput(p.FileID, po); err != nil {
 		h.log.Error().Err(err).Msg("Failed to add processed output to database")
 		return err
 	}
 
-	h.log.Info().Msgf("Processed video metadata for file %s", p.FileID)
+	// Generate the metadata file
+	_, err = generateMetadataFile(h.fs, f, m)
+	if err != nil {
+		h.log.Error().Err(err).Msg("Failed to generate metadata file")
+		return err
+	}
+
+	h.log.Info().Msgf("Processed video metadata for file %s and saved to %s", p.FileID, po.StoragePath)
 	return nil
 }
 
-func processedOutput(vm *lib.VideoMetadata) models.ProcessedOutput {
+func generateMetadataFile(fs lib.FileSystem, f *models.File, vm *lib.VideoMetadata) (string, error) {
+	// Create the metadata file
+	metadataFile := fmt.Sprintf("%s/%s-metadata.%s", f.StoragePath, f.ID, metadataExt)
+	file, err := fs.Create(metadataFile)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Write the metadata to the file
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(vm); err != nil {
+		return "", err
+	}
+
+	return metadataFile, nil
+}
+
+func processedOutput(f *models.File, vm *lib.VideoMetadata) models.ProcessedOutput {
 	return models.ProcessedOutput{
-		BitRate:    vm.BitRate,
-		Codec:      vm.Codec,
-		Duration:   vm.Duration,
-		Height:     vm.Height,
-		Resolution: vm.Resolution,
-		Size:       vm.Size,
-		Type:       "video_metadata",
-		Width:      vm.Width,
+		BitRate:     vm.BitRate,
+		Codec:       vm.Codec,
+		Duration:    vm.Duration,
+		Height:      vm.Height,
+		Resolution:  vm.Resolution,
+		Size:        vm.Size,
+		Type:        models.VideoMetadataType,
+		Width:       vm.Width,
+		Name:        fmt.Sprintf("%s-%s", f.ID, "metadata"),
+		Extension:   metadataExt,
+		StoragePath: f.StoragePath,
 	}
 }

@@ -6,8 +6,10 @@ Each API can be invoked and configured through the ReST client of your choice.
 
 #### POST - /file/upload
 
-The upload API is the entry point for the file upload, storage, and processing flows. Currently, the upload API
-limits the file size to 10MB
+The file-upload API is the entry point for the file upload, storage, and processing flows. Currently, the upload API limits the file size to 10MB and is stored in the local file system, underneath the uploads directory.
+
+The service utilizes a background job processor to process uploaded content based on the content type.
+- For video uploads, metadata generation is automatically done for you assuming that you were able to successfully set up application with redis.
 
 + Request 
 

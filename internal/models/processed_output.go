@@ -8,11 +8,17 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	VideoMetadataType = "video_metadata" // The type of the processed output
+	ResizedImageType  = "resized_image"  // The type of the resized image
+)
+
 type ProcessedOutput struct {
 	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()"` // The unique identifier of the processed output
 	BitRate     string    `json:"bit_rate"`                            // The bit rate of the processed output
 	Codec       string    `json:"codec"`                               // The codec of the processed output
 	Duration    string    `json:"duration"`                            // The duration of the processed output
+	Extension   string    `json:"extension"`                           // The file extension of the processed output
 	Format      string    `json:"format"`                              // The format of the processed output
 	Height      int       `json:"height"`                              // The height of the processed output
 	Name        string    `json:"name"`                                // The name of the processed output

@@ -30,6 +30,12 @@ packages:
             dir: "internal/mocks/mocklib"
             mockname: "{{.InterfaceName}}"
             outpkg: "mocklib"
+        FileSystem:
+          config:
+            filename: "mock_filesystem.go"
+            dir: "internal/mocks/mocklib"
+            mockname: "{{.InterfaceName}}"
+            outpkg: "mocklib"
     simple-file-processor/internal/tasks:
       config:
       interfaces:
