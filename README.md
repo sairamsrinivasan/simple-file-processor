@@ -5,17 +5,17 @@ This is a go based file upload service with asynchronous processing and database
 ## Features
 
 - File upload with unique naming to avoid collisions
-- Image resizing through background jobs
+- Background processing for uploaded files. Supports the following tasks
+    - Metadata Extraction for Videos using ffmpeg
+    - Image Resizing
 - Image Type Detection based on file name and extension
 - PostgreSQL Metadata Storage using GORM
 - Structured Logging with Zerolog
-- Unit Testing with mocking support
+- Unit Testing with mocking support using mockery
 
 ## TODO
 
-- Implement background processing for uploaded files (workers, queues)
 - Track processing task statuses
-- Expand support to include videos and other file formats
 - Add authentication and rate limiting
 - Write comprehensive API documentation
 - Set up CI pipeline using GHA

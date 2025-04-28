@@ -1,6 +1,7 @@
 package tasks_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"simple-file-processor/internal/lib"
@@ -18,6 +19,17 @@ import (
 )
 
 var log = zerolog.Nop()
+
+// MockFile is a mock implementation of the os.File interface
+// to simulate file operations in tests
+// This is a simple mock that embeds bytes.Buffer, todo: Move to a separate file if needed
+type MockFile struct {
+	bytes.Buffer
+}
+
+func (m *MockFile) Close() error {
+	return nil
+}
 
 // Test_NewVideoMetadataTask tests the NewVideoMetadataTask function
 func Test_NewVideoMetadataTask(t *testing.T) {
@@ -58,6 +70,7 @@ func TestNewVideoMetadataHandler(t *testing.T) {
 		name    string
 		db      *mockdb.Database
 		resizer *mocklib.MetadataExtractor
+		fs      *mocklib.FileSystem
 		logger  *zerolog.Logger
 	}{
 		{
@@ -70,7 +83,7 @@ func TestNewVideoMetadataHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			handler := tasks.NewVideoMetadataHandler(tt.resizer, tt.db, tt.logger)
+			handler := tasks.NewVideoMetadataHandler(tt.resizer, tt.db, tt.fs, tt.logger)
 			assert.NotNil(t, handler)
 		})
 	}
@@ -81,20 +94,25 @@ func TestVideoMetadataProcessTask(t *testing.T) {
 	task := asynq.NewTask(tasks.VideoMetadataTaskType, []byte(`{"FileID":"123","StoragePath":"/path/to/file","Filename":"test.mp4"}`))
 
 	tests := []struct {
-		name          string
-		mockDB        func(m *mockdb.Database)
-		mockExtractor func(m *mocklib.MetadataExtractor)
-		task          *asynq.Task
-		expectErr     bool
+		name           string
+		mockDB         func(m *mockdb.Database)
+		mockExtractor  func(m *mocklib.MetadataExtractor)
+		mockFileSystem func(m *mocklib.FileSystem)
+		task           *asynq.Task
+		expectErr      bool
 	}{
 		{
 			name: "valid task",
 			mockDB: func(m *mockdb.Database) {
-				m.On("FileByID", "123").Return(&models.File{StoragePath: "/path/to/file", OriginalName: "test.mp4", UploadedExtension: "mp4"}, nil)
-				m.On("AddProcessedOutput", "123", mock.Anything).Return(nil, nil)
+				fid := "123"
+				m.On("FileByID", fid).Return(&models.File{ID: fid, StoragePath: "/path/to/file", OriginalName: "test.mp4", UploadedExtension: "mp4"}, nil)
+				m.On("AddProcessedOutput", fid, mock.Anything).Return(nil, nil)
 			},
 			mockExtractor: func(m *mocklib.MetadataExtractor) {
 				m.On("ExtractVideoMetadata", "/path/to/file/test.mp4").Return(&lib.VideoMetadata{}, nil)
+			},
+			mockFileSystem: func(m *mocklib.FileSystem) {
+				m.On("Create", "/path/to/file/123-metadata.json").Return(&MockFile{}, nil)
 			},
 			task:      task,
 			expectErr: false,
@@ -104,9 +122,10 @@ func TestVideoMetadataProcessTask(t *testing.T) {
 			mockDB: func(m *mockdb.Database) {
 				m.On("FileByID", "123").Return(&models.File{StoragePath: "/path/to/file", OriginalName: "test.txt", UploadedExtension: "txt"}, nil)
 			},
-			mockExtractor: func(_ *mocklib.MetadataExtractor) {},
-			task:          task,
-			expectErr:     true,
+			mockExtractor:  func(_ *mocklib.MetadataExtractor) {},
+			mockFileSystem: func(m *mocklib.FileSystem) {},
+			task:           task,
+			expectErr:      true,
 		},
 		{
 			name: "failed to extract video metadata",
@@ -116,8 +135,9 @@ func TestVideoMetadataProcessTask(t *testing.T) {
 			mockExtractor: func(m *mocklib.MetadataExtractor) {
 				m.On("ExtractVideoMetadata", "/path/to/file/test.mp4").Return(nil, errors.New("extract error"))
 			},
-			task:      task,
-			expectErr: true,
+			mockFileSystem: func(m *mocklib.FileSystem) {},
+			task:           task,
+			expectErr:      true,
 		},
 		{
 			name: "failed to add processed output",
@@ -128,8 +148,9 @@ func TestVideoMetadataProcessTask(t *testing.T) {
 			mockExtractor: func(m *mocklib.MetadataExtractor) {
 				m.On("ExtractVideoMetadata", "/path/to/file/test.mp4").Return(&lib.VideoMetadata{}, nil)
 			},
-			task:      task,
-			expectErr: true,
+			mockFileSystem: func(m *mocklib.FileSystem) {},
+			task:           task,
+			expectErr:      true,
 		},
 	}
 
@@ -137,10 +158,12 @@ func TestVideoMetadataProcessTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			db := new(mockdb.Database)
 			ext := new(mocklib.MetadataExtractor)
-			handler := tasks.NewVideoMetadataHandler(ext, db, &log)
+			fs := new(mocklib.FileSystem)
+			handler := tasks.NewVideoMetadataHandler(ext, db, fs, &log)
 
 			tt.mockDB(db)
 			tt.mockExtractor(ext)
+			tt.mockFileSystem(fs)
 
 			err := handler.ProcessTask(context.Background(), tt.task)
 			if (tt.expectErr && err == nil) || (!tt.expectErr && err != nil) {

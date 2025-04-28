@@ -51,7 +51,7 @@ func (ws *workerServer) Start() {
 	mux.Handle(tasks.ImageResizeTaskType, tasks.NewImageResizeHandler(ws.db, lib.NewResizer(ws.log), ws.log))
 
 	// Register the video metadata handler with the task queue
-	mux.Handle(tasks.VideoMetadataTaskType, tasks.NewVideoMetadataHandler(lib.NewMetadataExtractor(cmdexec, ws.log), ws.db, ws.log))
+	mux.Handle(tasks.VideoMetadataTaskType, tasks.NewVideoMetadataHandler(lib.NewMetadataExtractor(cmdexec, ws.log), ws.db, lib.NewFileSystem(), ws.log))
 
 	ws.log.Info().Msg("Starting worker server...")
 
