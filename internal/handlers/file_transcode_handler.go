@@ -10,9 +10,9 @@ import (
 )
 
 type transcodeRequest struct {
-	format     string `json:"format"`     // The format to transcode the video to
-	quality    string `json:"quality"`    // The quality of the transcoded video
-	resolution string `json:"resolution"` // The resolution of the transcoded video
+	Format     string `json:"format"`     // The format to transcode the video to
+	Quality    string `json:"quality"`    // The quality of the transcoded video
+	Resolution string `json:"resolution"` // The resolution of the transcoded video
 }
 
 // A handler that triggers video transcoding tasks
@@ -24,7 +24,7 @@ func (h handler) FileTranscodeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if tr.format == "" || tr.quality == "" || tr.resolution == "" {
+	if tr.Format == "" || tr.Quality == "" || tr.Resolution == "" {
 		h.log.Error().Msg("Missing required fields in request body")
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
@@ -63,9 +63,9 @@ func transcode(f *models.File, tr *transcodeRequest, h handler) {
 	// Create the payload for the video transcode task
 	payload := tasks.VideoTranscodePayload{
 		FileID:     f.ID,
-		Format:     tr.format,
-		Quality:    tr.quality,
-		Resolution: tr.resolution,
+		Format:     tr.Format,
+		Quality:    tr.Quality,
+		Resolution: tr.Resolution,
 	}
 
 	task, err := tasks.NewTranscodingTask(h.ac, &payload, h.log)
