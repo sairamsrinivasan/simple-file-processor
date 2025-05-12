@@ -27,7 +27,7 @@ func (h handler) FileResizeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req fileResizeRequest
-	if err := h.parseRequest(r, &req); err != nil {
+	if err := h.ParseRequest(r, &req); err != nil {
 		h.log.Error().Err(err).Msg("Failed to parse file resize request")
 		http.Error(w, `{"error": "Failed to parse request"}`, http.StatusBadRequest)
 		return

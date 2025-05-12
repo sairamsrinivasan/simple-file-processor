@@ -19,6 +19,11 @@
             "path": "/file/{id}/resize",
             "handler": "FileResizeHandler",
             "method": "PUT"
+        },
+        {
+            "path": "file/{id}/transcode",
+            "handler": "FileTranscodeHandler",
+            "method": "PUT"
         }
     ],
     "database": {

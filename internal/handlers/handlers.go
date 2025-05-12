@@ -36,6 +36,7 @@ func NewHandlers(log *zerolog.Logger, db db.Database, ac tasks.Client) Handlers 
 	h.Handlers["HealthCheckHandler"] = http.HandlerFunc(h.HealthCheckHandler)
 	h.Handlers["FileUploadHandler"] = http.HandlerFunc(h.FileUploadHandler)
 	h.Handlers["FileResizeHandler"] = http.HandlerFunc(h.FileResizeHandler)
+	h.Handlers["FileTranscodeHandler"] = http.HandlerFunc(h.FileTranscodeHandler)
 	return h
 }
 
@@ -50,7 +51,7 @@ func (h handler) GetHandler(name string) func(w http.ResponseWriter, r *http.Req
 }
 
 // parseRequest parses the request body into the given struct
-func (h handler) parseRequest(r *http.Request, v interface{}) error {
+func (h handler) ParseRequest(r *http.Request, v interface{}) error {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	return decoder.Decode(v)
